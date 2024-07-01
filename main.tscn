@@ -1,0 +1,35 @@
+[gd_scene load_steps=5 format=3 uid="uid://b1p0g8bnb8v85"]
+
+[ext_resource type="Script" path="res://Field.gd" id="1_2s0rj"]
+[ext_resource type="Script" path="res://main.gd" id="1_nuinv"]
+[ext_resource type="Script" path="res://Cell.gd" id="2_llep4"]
+[ext_resource type="Texture2D" uid="uid://c7cjbwtpuwwt8" path="res://addons/pckable/resources/remove_icon.png" id="2_swr4j"]
+
+[node name="Node" type="Node"]
+script = ExtResource("1_nuinv")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+
+[node name="Field" type="Node" parent="."]
+script = ExtResource("1_2s0rj")
+width = 8
+height = 14
+bombs_count = 8
+
+[node name="TopPart" type="Node2D" parent="Field"]
+
+[node name="MiddlePart" type="Node2D" parent="Field"]
+
+[node name="Cell" type="Node2D" parent="Field/MiddlePart"]
+script = ExtResource("2_llep4")
+
+[node name="FrontContainer" type="Node2D" parent="Field/MiddlePart/Cell"]
+
+[node name="Sprite2D" type="Sprite2D" parent="Field/MiddlePart/Cell/FrontContainer"]
+texture = ExtResource("2_swr4j")
+
+[node name="BackContainer" type="Node2D" parent="Field/MiddlePart/Cell"]
+
+[node name="Front" type="Sprite2D" parent="Field/MiddlePart/Cell/BackContainer"]
+
+[node name="BottomPart" type="Node2D" parent="Field"]

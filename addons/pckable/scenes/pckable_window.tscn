@@ -1,0 +1,78 @@
+[gd_scene load_steps=7 format=3 uid="uid://qhfaum04xug0"]
+
+[ext_resource type="Script" path="res://addons/pckable/scripts/window/pckable_window.gd" id="1_uc6w7"]
+[ext_resource type="Script" path="res://addons/pckable/scripts/window/pckable_window_menu.gd" id="2_rxjup"]
+[ext_resource type="PackedScene" uid="uid://67lwk23hragu" path="res://addons/pckable/scenes/pckable_export_progress_popup.tscn" id="3_jwimu"]
+[ext_resource type="Script" path="res://addons/pckable/scripts/window/pckable_window_catalog_factory.gd" id="3_sf40m"]
+[ext_resource type="Script" path="res://addons/pckable/scripts/window/pckable_window_catalog_tree.gd" id="4_mgekm"]
+[ext_resource type="Texture2D" uid="uid://c7cjbwtpuwwt8" path="res://addons/pckable/resources/remove_icon.png" id="5_f5ut0"]
+
+[node name="PckableWindow" type="Window" node_paths=PackedStringArray("_catalog_tree", "_catalog_factory", "_menu")]
+title = "PCKable"
+initial_position = 1
+size = Vector2i(1280, 720)
+script = ExtResource("1_uc6w7")
+_catalog_tree = NodePath("Control/VerticalContainer/CatalogTree")
+_catalog_factory = NodePath("Control/VerticalContainer/CatalogFactory")
+_menu = NodePath("Control/VerticalContainer/MenuBar")
+
+[node name="Control" type="PanelContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="VerticalContainer" type="VBoxContainer" parent="Control"]
+layout_mode = 2
+
+[node name="MenuBar" type="HBoxContainer" parent="Control/VerticalContainer" node_paths=PackedStringArray("_export_all_button", "_export_selected_button", "_preset_button", "_refresh_button")]
+layout_mode = 2
+script = ExtResource("2_rxjup")
+_export_all_button = NodePath("ExportAll")
+_export_selected_button = NodePath("ExportSelected")
+_preset_button = NodePath("PresetButton")
+_refresh_button = NodePath("Refresh")
+_export_progress_popup_scene = ExtResource("3_jwimu")
+
+[node name="ExportAll" type="Button" parent="Control/VerticalContainer/MenuBar"]
+layout_mode = 2
+text = "Export All PCKs"
+
+[node name="ExportSelected" type="Button" parent="Control/VerticalContainer/MenuBar"]
+layout_mode = 2
+text = "Export Selected"
+
+[node name="PresetButton" type="OptionButton" parent="Control/VerticalContainer/MenuBar"]
+layout_mode = 2
+selected = 0
+
+[node name="Refresh" type="Button" parent="Control/VerticalContainer/MenuBar"]
+layout_mode = 2
+text = "Refresh"
+
+[node name="CatalogFactory" type="HBoxContainer" parent="Control/VerticalContainer"]
+layout_mode = 2
+script = ExtResource("3_sf40m")
+
+[node name="LineEdit" type="LineEdit" parent="Control/VerticalContainer/CatalogFactory"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "new_catalog_name"
+
+[node name="Button" type="Button" parent="Control/VerticalContainer/CatalogFactory"]
+layout_mode = 2
+text = "Add Catalog"
+
+[node name="CatalogTree" type="Tree" parent="Control/VerticalContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+columns = 2
+column_titles_visible = true
+select_mode = 2
+scroll_horizontal_enabled = false
+script = ExtResource("4_mgekm")
+_remove_texture = ExtResource("5_f5ut0")

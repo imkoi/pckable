@@ -1,0 +1,31 @@
+[gd_scene load_steps=2 format=3 uid="uid://cwj3v6q5cn1j6"]
+
+[ext_resource type="Script" path="res://addons/pckable/scripts/pckable_inspector.gd" id="1_h2c4i"]
+
+[node name="PckableInspector" type="VBoxContainer"]
+offset_right = 184.0
+offset_bottom = 24.0
+script = ExtResource("1_h2c4i")
+
+[node name="PckableSwitch" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="PckableSwitch"]
+layout_mode = 2
+text = "PCKable"
+
+[node name="CheckButton" type="CheckButton" parent="PckableSwitch"]
+layout_mode = 2
+size_flags_horizontal = 10
+
+[node name="PckableCatalog" type="HBoxContainer" parent="."]
+visible = false
+layout_mode = 2
+
+[node name="Label" type="Label" parent="PckableCatalog"]
+layout_mode = 2
+text = "Catalog"
+
+[node name="OptionButton" type="OptionButton" parent="PckableCatalog"]
+layout_mode = 2
+size_flags_horizontal = 3
