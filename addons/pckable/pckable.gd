@@ -30,7 +30,7 @@ func load_catalog(catalog_name: StringName, timeout_msec: int = 60000) -> bool:
 			push_error("downloaded empty catalog")
 			return false
 		
-		var file_path = PckablePathUtility.get_project_path()
+		var file_path = PckablePathUtility.get_executable_dir()
 		file_path += catalog_name + ".pck"
 		
 		var file := FileAccess.open(file_path, FileAccess.WRITE_READ)

@@ -17,8 +17,8 @@ func _export_begin(features, is_debug, path, flags):
 		return
 	
 	var preset_name = get_preset_name()
-	
-	var full_path = PckablePathUtility.get_project_path() + path
+	var full_path = PckablePathUtility.get_file_dir(path)
+
 	var catalog_names = _storage.get_catalog_names()
 	
 	PckableExporter.export(full_path, catalog_names, preset_name, _storage, null)

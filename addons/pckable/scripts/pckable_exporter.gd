@@ -44,12 +44,7 @@ static func export(path: String, catalog_names: PackedStringArray,
 		for output in outputs:
 			print(output)
 		
-		for res in resources:
-			print("export %s" % res)
-		
 		postprocess_export_preset(preset_name, original_presets)
-		
-		print("finish exporting %s catalog" % catalog_name)
 	
 	if progress_popup:
 		progress_popup.hide()
@@ -68,7 +63,7 @@ static func preprocess_export_preset(preset_name: String,
 		if config.get_value(section, "name") != preset_name:
 			continue
 		
-		if config.has_section_key(section, "export_files"):
+		if not config.has_section_key(section, "export_files"):
 			return null
 		
 		original_files = config.get_value(section, "export_files")
