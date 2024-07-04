@@ -62,7 +62,7 @@ func _export(catalog_names: PackedStringArray) -> void:
 	var preset_name = _preset_button.get_item_text(preset_index)
 	
 	PckableExporter.export(dir_selected, catalog_names, preset_name,
-	 true, _storage, _export_progress_popup)
+	 _storage, _export_progress_popup)
 
 
 func _exit_tree() -> void:

@@ -5,8 +5,8 @@ const PRESET_PATH := "res://export_presets.cfg"
 
 
 static func export(path: String, catalog_names: PackedStringArray,
- preset_name: String, exprot_from_window: bool,
- storage: PckableStorage, progress_popup: PckableExportProgressPopup) -> void:
+ preset_name: String, storage: PckableStorage,
+ progress_popup: PckableExportProgressPopup) -> void:
 	var popup_resolution = Vector2(
 		DisplayServer.screen_get_size().x / 6,
 		DisplayServer.screen_get_size().y / 6)
@@ -27,22 +27,27 @@ static func export(path: String, catalog_names: PackedStringArray,
 		var pck_file_path := "%s/%s.pck" % [path, catalog_name]
 		var resources = storage.get_resources(catalog_name)
 		
-		var old_resources = preprocess_export_preset(preset_name, resources)
+		var original_presets = preprocess_export_preset(preset_name, resources)
 		
 		pck_file_path = pck_file_path.replace(project_path, "")
-
+		
 		var arg = ARGS % [
 			godot_executable_path,
 			project_path,
 			preset_name,
 			pck_file_path]
 		
-		OS.execute("CMD.exe", ["/C", arg])
+		var outputs = []
+		
+		OS.execute("CMD.exe", ["/C", arg], outputs)
+		
+		for output in outputs:
+			print(output)
 		
 		for res in resources:
 			print("export %s" % res)
 		
-		postprocess_export_preset(preset_name, old_resources)
+		postprocess_export_preset(preset_name, original_presets)
 		
 		print("finish exporting %s catalog" % catalog_name)
 	
@@ -51,9 +56,10 @@ static func export(path: String, catalog_names: PackedStringArray,
 	print("all catalogs exported")
 
 
-static func preprocess_export_preset(preset_name: String, files: PackedStringArray) -> PackedStringArray:
+static func preprocess_export_preset(preset_name: String,
+ files: PackedStringArray):
 	var config = PckablePresetProvider.get_preset_config()
-	var old_files := PackedStringArray()
+	var original_files := PackedStringArray()
 	
 	for section in config.get_sections():
 		if not config.has_section_key(section, "name"):
@@ -62,15 +68,21 @@ static func preprocess_export_preset(preset_name: String, files: PackedStringArr
 		if config.get_value(section, "name") != preset_name:
 			continue
 		
-		old_files = config.get_value(section, "export_files") as PackedStringArray
+		if config.has_section_key(section, "export_files"):
+			return null
+		
+		original_files = config.get_value(section, "export_files")
+		
 		config.set_value(section, "export_files", files)
+		break
 	
 	config.save(PRESET_PATH)
 	
-	return old_files
+	return original_files
 
 
-static func postprocess_export_preset(preset_name: String, files: PackedStringArray) -> void:
+static func postprocess_export_preset(preset_name: String,
+ original_files) -> void:
 	var config = PckablePresetProvider.get_preset_config()
 	
 	for section in config.get_sections():
@@ -80,9 +92,9 @@ static func postprocess_export_preset(preset_name: String, files: PackedStringAr
 		if config.get_value(section, "name") != preset_name:
 			continue
 		
-		if files.size() == 0:
-			config.erase_section_key(section, "export_files")
+		if original_files:
+			config.set_value(section, "export_files", original_files)
 		else:
-			config.set_value(section, "export_files", files)
+			config.erase_section_key(section, "export_files")
 	
 	config.save(PRESET_PATH)

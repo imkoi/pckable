@@ -13,14 +13,12 @@ func _get_name():
 
 
 func _export_begin(features, is_debug, path, flags):
-	#var platform = EditorExportPlatform.get
-	#var options = _get_export_options(platform)
+	if OS.get_cmdline_args().has("--export-pack"):
+		return
 	
-	#print(options)
+	var preset_name = get_preset_name()
 	
-	if features.has("pckable_export_catalogs"):
-		pass
-		#var full_path = PckablePathUtility.get_project_path() + path
-		#var catalog_names = _storage.get_catalog_names()
-		
-		#PckableExporter.export(full_path, catalog_names, false, _storage, null)
+	var full_path = PckablePathUtility.get_project_path() + path
+	var catalog_names = _storage.get_catalog_names()
+	
+	PckableExporter.export(full_path, catalog_names, preset_name, _storage, null)
