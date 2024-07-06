@@ -20,13 +20,13 @@ func setup(catalog_name: String, catalogs: Array) -> void:
 
 func _ready() -> void:
 	var has_catalog = not _catalog_name.is_empty()
-
+	
 	check_button.set_pressed(has_catalog)
 	catalog_container.set_visible(has_catalog)
-
+	
 	for dictionary in _catalogs:
 		option_button.add_item(dictionary[PckableStorage.NAME_KEY])
-		
+	
 	check_button.toggled.connect(_on_toggled)
 	option_button.item_selected.connect(_on_item_selected)
 

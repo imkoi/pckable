@@ -1,7 +1,7 @@
 class_name PckableExporter extends Node
 
+
 const ARGS := "\"%s\" --headless --path \"%s\" --export-pack \"%s\" \"%s\""
-const PRESET_PATH := "res://export_presets.cfg"
 
 
 static func export(path: String, catalog_names: PackedStringArray,
@@ -24,10 +24,19 @@ static func export(path: String, catalog_names: PackedStringArray,
 		
 		var godot_executable_path = OS.get_executable_path()
 		var project_path := ProjectSettings.globalize_path("res://")
-		var pck_file_path := "%s/%s.pck" % [path, catalog_name]
+		var build_path := path
+		
+		if storage.get_catalog_address(catalog_name) != "local":
+			build_path += "remote/"
+			var build_dir = DirAccess.open(build_path)
+			
+			if not build_dir:
+				DirAccess.make_dir_absolute(build_path)
+		
+		var pck_file_path := "%s/%s.pck" % [build_path, catalog_name]
 		var resources = storage.get_resources(catalog_name)
 		
-		var original_presets = preprocess_export_preset(preset_name, resources)
+		var original_presets = PckablePresetPatcher.preprocess_export_preset(preset_name, resources)
 		
 		pck_file_path = pck_file_path.replace(project_path, "")
 		
@@ -44,52 +53,8 @@ static func export(path: String, catalog_names: PackedStringArray,
 		for output in outputs:
 			print(output)
 		
-		postprocess_export_preset(preset_name, original_presets)
+		PckablePresetPatcher.postprocess_export_preset(preset_name, original_presets)
 	
 	if progress_popup:
 		progress_popup.hide()
 	print("all catalogs exported")
-
-
-static func preprocess_export_preset(preset_name: String,
- files: PackedStringArray):
-	var config = PckablePresetProvider.get_preset_config()
-	var original_files := PackedStringArray()
-	
-	for section in config.get_sections():
-		if not config.has_section_key(section, "name"):
-			continue
-		
-		if config.get_value(section, "name") != preset_name:
-			continue
-		
-		if not config.has_section_key(section, "export_files"):
-			return null
-		
-		original_files = config.get_value(section, "export_files")
-		
-		config.set_value(section, "export_files", files)
-		break
-	
-	config.save(PRESET_PATH)
-	
-	return original_files
-
-
-static func postprocess_export_preset(preset_name: String,
- original_files) -> void:
-	var config = PckablePresetProvider.get_preset_config()
-	
-	for section in config.get_sections():
-		if not config.has_section_key(section, "name"):
-			continue
-		
-		if config.get_value(section, "name") != preset_name:
-			continue
-		
-		if original_files:
-			config.set_value(section, "export_files", original_files)
-		else:
-			config.erase_section_key(section, "export_files")
-	
-	config.save(PRESET_PATH)
