@@ -1,11 +1,12 @@
-[gd_scene load_steps=7 format=3 uid="uid://qhfaum04xug0"]
+[gd_scene load_steps=8 format=3 uid="uid://qhfaum04xug0"]
 
 [ext_resource type="Script" path="res://addons/pckable/scripts/window/pckable_window.gd" id="1_uc6w7"]
 [ext_resource type="Script" path="res://addons/pckable/scripts/window/pckable_window_menu.gd" id="2_rxjup"]
 [ext_resource type="PackedScene" uid="uid://67lwk23hragu" path="res://addons/pckable/scenes/pckable_export_progress_popup.tscn" id="3_jwimu"]
 [ext_resource type="Script" path="res://addons/pckable/scripts/window/pckable_window_catalog_factory.gd" id="3_sf40m"]
 [ext_resource type="Script" path="res://addons/pckable/scripts/window/pckable_window_catalog_tree.gd" id="4_mgekm"]
-[ext_resource type="Texture2D" uid="uid://c7cjbwtpuwwt8" path="res://addons/pckable/resources/remove_icon.png" id="5_f5ut0"]
+[ext_resource type="Texture2D" uid="uid://sgqu0a07mbxo" path="res://addons/pckable/resources/Remove.svg" id="6_qqit0"]
+[ext_resource type="Texture2D" uid="uid://6830r5hvk5vq" path="res://addons/pckable/resources/File.svg" id="7_0ibex"]
 
 [node name="PckableWindow" type="Window" node_paths=PackedStringArray("_catalog_tree", "_catalog_factory", "_menu")]
 title = "PCKable"
@@ -47,7 +48,6 @@ text = "Export Selected"
 
 [node name="PresetButton" type="OptionButton" parent="Control/VerticalContainer/MenuBar"]
 layout_mode = 2
-selected = 0
 
 [node name="Refresh" type="Button" parent="Control/VerticalContainer/MenuBar"]
 layout_mode = 2
@@ -75,4 +75,7 @@ column_titles_visible = true
 select_mode = 2
 scroll_horizontal_enabled = false
 script = ExtResource("4_mgekm")
-_remove_texture = ExtResource("5_f5ut0")
+_remove_texture = ExtResource("6_qqit0")
+_file_texture = ExtResource("7_0ibex")
+_catalog_text_color = Color(0.909011, 0.912522, 0.919529, 1)
+_resource_text_color = Color(0.754191, 0.763951, 0.773699, 1)

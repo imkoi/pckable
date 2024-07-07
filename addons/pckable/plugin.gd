@@ -17,34 +17,40 @@ var catalogs: Dictionary;
 
 
 func _enter_tree() -> void:
-	storage = PckableStorage.new();
-
+	storage = PckableStorage.new()
+	
 	if not storage.setup():
-		push_error("Not able to initialize plugin");
-		return;
+		push_error("Not able to initialize plugin")
+		return
 	
-	inspector_plugin = INSPECTOR_PLUGIN_RESOURCE.new();
-	export_plugin = EXPORT_PLUGIN_RESOURCE.new();
-
-	inspector_plugin.setup(storage);
-	export_plugin.setup(storage);
+	add_autoload_singleton(PCKABLE_SINGLETON_NAME, PCKABLE_SINGLETON_PATH)
 	
-	add_inspector_plugin(inspector_plugin);
-	add_export_plugin(export_plugin);
+	if _exporting_now():
+		return
 	
-	add_autoload_singleton(PCKABLE_SINGLETON_NAME, PCKABLE_SINGLETON_PATH);
-	add_tool_menu_item(PCKABLE_WINDOW_NAME, _open_window);
+	inspector_plugin = INSPECTOR_PLUGIN_RESOURCE.new()
+	export_plugin = EXPORT_PLUGIN_RESOURCE.new()
+	
+	inspector_plugin.setup(storage)
+	export_plugin.setup(storage)
+	
+	add_inspector_plugin(inspector_plugin)
+	add_export_plugin(export_plugin)
+	add_tool_menu_item(PCKABLE_WINDOW_NAME, _open_window)
 
 
 func _exit_tree() -> void:
-	remove_inspector_plugin(inspector_plugin);
-	remove_export_plugin(export_plugin);
+	remove_autoload_singleton(PCKABLE_SINGLETON_NAME)
 	
-	remove_autoload_singleton(PCKABLE_SINGLETON_NAME);
-	remove_tool_menu_item(PCKABLE_WINDOW_NAME);
+	if _exporting_now():
+		return
+		
+	remove_inspector_plugin(inspector_plugin)
+	remove_export_plugin(export_plugin)
+	remove_tool_menu_item(PCKABLE_WINDOW_NAME)
 	
-	storage.force_save_catalogs();
-	storage.free();
+	storage.force_save_catalogs()
+	storage.free()
 
 
 func _open_window() -> void:
@@ -52,12 +58,16 @@ func _open_window() -> void:
 		var screen_resolution = DisplayServer.screen_get_size();
 		var target_resolution = Vector2(
 				screen_resolution.x / 2,
-				screen_resolution.y / 2);
+				screen_resolution.y / 2)
 		
-		window = WINDOW_RESOURCE.instantiate();
+		window = WINDOW_RESOURCE.instantiate()
 		window.setup(storage)
-		window.size = target_resolution;
+		window.size = target_resolution
 		
-		EditorInterface.popup_dialog_centered(window);
+		EditorInterface.popup_dialog_centered(window)
 	else:
-		window.move_to_foreground();
+		window.move_to_foreground()
+
+
+func _exporting_now() -> bool:
+	return OS.get_cmdline_args().has("--export-pack")
