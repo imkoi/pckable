@@ -1,9 +1,8 @@
-[gd_scene load_steps=5 format=3 uid="uid://b1p0g8bnb8v85"]
+[gd_scene load_steps=4 format=3 uid="uid://b1p0g8bnb8v85"]
 
 [ext_resource type="Script" path="res://Field.gd" id="1_2s0rj"]
 [ext_resource type="Script" path="res://main.gd" id="1_nuinv"]
 [ext_resource type="Script" path="res://Cell.gd" id="2_llep4"]
-[ext_resource type="Texture2D" uid="uid://c7cjbwtpuwwt8" path="res://addons/pckable/resources/remove_icon.png" id="2_swr4j"]
 
 [node name="Node" type="Node"]
 script = ExtResource("1_nuinv")
@@ -26,7 +25,6 @@ script = ExtResource("2_llep4")
 [node name="FrontContainer" type="Node2D" parent="Field/MiddlePart/Cell"]
 
 [node name="Sprite2D" type="Sprite2D" parent="Field/MiddlePart/Cell/FrontContainer"]
-texture = ExtResource("2_swr4j")
 
 [node name="BackContainer" type="Node2D" parent="Field/MiddlePart/Cell"]
 

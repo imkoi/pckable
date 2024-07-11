@@ -12,6 +12,7 @@ static func get_executable_dir() -> String:
 	
 	return file_path
 
+
 static func get_project_dir() -> String:
 	return ProjectSettings.globalize_path("res://")
 

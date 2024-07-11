@@ -5,7 +5,7 @@ const ARGS := "\"%s\" --headless --path \"%s\" --export-pack \"%s\" \"%s\""
 
 
 static func export(path: String, catalog_names: PackedStringArray,
- preset_name: String, storage: PckableStorage,
+ preset_name: String, storage: PckableStorageEditor,
  progress_popup: PckableExportProgressPopup) -> void:
 	var popup_resolution = Vector2(
 		DisplayServer.screen_get_size().x / 6,
@@ -57,4 +57,3 @@ static func export(path: String, catalog_names: PackedStringArray,
 	
 	if progress_popup:
 		progress_popup.hide()
-	print("all catalogs exported")

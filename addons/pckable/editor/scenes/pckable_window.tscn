@@ -1,18 +1,18 @@
 [gd_scene load_steps=8 format=3 uid="uid://qhfaum04xug0"]
 
-[ext_resource type="Script" path="res://addons/pckable/scripts/window/pckable_window.gd" id="1_uc6w7"]
-[ext_resource type="Script" path="res://addons/pckable/scripts/window/pckable_window_menu.gd" id="2_rxjup"]
-[ext_resource type="PackedScene" uid="uid://67lwk23hragu" path="res://addons/pckable/scenes/pckable_export_progress_popup.tscn" id="3_jwimu"]
-[ext_resource type="Script" path="res://addons/pckable/scripts/window/pckable_window_catalog_factory.gd" id="3_sf40m"]
-[ext_resource type="Script" path="res://addons/pckable/scripts/window/pckable_window_catalog_tree.gd" id="4_mgekm"]
-[ext_resource type="Texture2D" uid="uid://sgqu0a07mbxo" path="res://addons/pckable/resources/Remove.svg" id="6_qqit0"]
-[ext_resource type="Texture2D" uid="uid://6830r5hvk5vq" path="res://addons/pckable/resources/File.svg" id="7_0ibex"]
+[ext_resource type="Script" path="res://addons/pckable/editor/pckable_window.gd" id="1_1qj6t"]
+[ext_resource type="Script" path="res://addons/pckable/editor/pckable_window_menu.gd" id="2_j7bdd"]
+[ext_resource type="PackedScene" uid="uid://67lwk23hragu" path="res://addons/pckable/editor/scenes/pckable_export_progress_popup.tscn" id="3_dmdm5"]
+[ext_resource type="Script" path="res://addons/pckable/editor/pckable_window_catalog_factory.gd" id="4_oe5er"]
+[ext_resource type="Script" path="res://addons/pckable/editor/pckable_window_catalog_tree.gd" id="5_0f470"]
+[ext_resource type="Texture2D" uid="uid://sgqu0a07mbxo" path="res://addons/pckable/editor/resources/remove.svg" id="6_akt3k"]
+[ext_resource type="Texture2D" uid="uid://6830r5hvk5vq" path="res://addons/pckable/editor/resources/file.svg" id="7_cbr26"]
 
 [node name="PckableWindow" type="Window" node_paths=PackedStringArray("_catalog_tree", "_catalog_factory", "_menu")]
 title = "PCKable"
 initial_position = 1
 size = Vector2i(1280, 720)
-script = ExtResource("1_uc6w7")
+script = ExtResource("1_1qj6t")
 _catalog_tree = NodePath("Control/VerticalContainer/CatalogTree")
 _catalog_factory = NodePath("Control/VerticalContainer/CatalogFactory")
 _menu = NodePath("Control/VerticalContainer/MenuBar")
@@ -31,12 +31,12 @@ layout_mode = 2
 
 [node name="MenuBar" type="HBoxContainer" parent="Control/VerticalContainer" node_paths=PackedStringArray("_export_all_button", "_export_selected_button", "_preset_button", "_refresh_button")]
 layout_mode = 2
-script = ExtResource("2_rxjup")
+script = ExtResource("2_j7bdd")
 _export_all_button = NodePath("ExportAll")
 _export_selected_button = NodePath("ExportSelected")
 _preset_button = NodePath("PresetButton")
 _refresh_button = NodePath("Refresh")
-_export_progress_popup_scene = ExtResource("3_jwimu")
+_export_progress_popup_scene = ExtResource("3_dmdm5")
 
 [node name="ExportAll" type="Button" parent="Control/VerticalContainer/MenuBar"]
 layout_mode = 2
@@ -55,7 +55,7 @@ text = "Refresh"
 
 [node name="CatalogFactory" type="HBoxContainer" parent="Control/VerticalContainer"]
 layout_mode = 2
-script = ExtResource("3_sf40m")
+script = ExtResource("4_oe5er")
 
 [node name="LineEdit" type="LineEdit" parent="Control/VerticalContainer/CatalogFactory"]
 layout_mode = 2
@@ -74,8 +74,8 @@ columns = 2
 column_titles_visible = true
 select_mode = 2
 scroll_horizontal_enabled = false
-script = ExtResource("4_mgekm")
-_remove_texture = ExtResource("6_qqit0")
-_file_texture = ExtResource("7_0ibex")
+script = ExtResource("5_0f470")
+_remove_texture = ExtResource("6_akt3k")
+_file_texture = ExtResource("7_cbr26")
 _catalog_text_color = Color(0.909011, 0.912522, 0.919529, 1)
 _resource_text_color = Color(0.754191, 0.763951, 0.773699, 1)

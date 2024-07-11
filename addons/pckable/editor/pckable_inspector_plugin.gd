@@ -1,7 +1,7 @@
 class_name PckableInspectorPlugin extends EditorInspectorPlugin
 
 
-const INSPECTOR_RESOURCE: Resource = preload('res://addons/pckable/scenes/pckable_inspector.tscn')
+const INSPECTOR_RESOURCE: Resource = preload('res://addons/pckable/editor/scenes/pckable_inspector.tscn')
 const EXCLUDED_FILES = [
 	"res://project.godot",
 	"res://export_presets.cfg",
@@ -12,11 +12,11 @@ const EXCLUDED_DIRS = [
 ]
 
 var _path : String
-var _storage: PckableStorage
+var _storage: PckableStorageEditor
 var min_path_lenght = "res://".length()
 
 
-func setup(storage: PckableStorage) -> void:
+func setup(storage: PckableStorageEditor) -> void:
 	_storage = storage
 
 
@@ -39,17 +39,24 @@ func _can_handle(object : Object) -> bool:
 
 
 func _parse_begin(object : Object) -> void:
-	var inspector_instance := INSPECTOR_RESOURCE.instantiate() as PackefierInspector
+	var catalog_names := _storage.get_catalog_names()
 	
-	inspector_instance.setup(_storage.get_catalog_name(_path), _storage.get_catalogs())
+	if catalog_names.size() == 0:
+		return
+	
+	var inspector_instance := INSPECTOR_RESOURCE.instantiate() as PackefierInspector
+	var linked := not _storage.get_catalog_name_by_path(_path).is_empty()
+	var key := _storage.get_path_by_key(_path)
+	
+	inspector_instance.setup(_path, key, catalog_names, linked)
 	inspector_instance.save_requested.connect(on_save_requested)
 	
 	add_custom_control(inspector_instance)
 
 
-func on_save_requested(catalog_name: String, enabled: bool) -> void:
+func on_save_requested(key: String, catalog_name: String, enabled: bool) -> void:
 	if enabled:
-		_storage.add_resource_to_catalog(_path, catalog_name, true)
+		_storage.add_resource_to_catalog(key, _path, catalog_name, true)
 		print("add resource \"%s\" to %s" % [_path, catalog_name])
 	else:
 		_storage.remove_resource_from_catalog(_path, catalog_name, true)

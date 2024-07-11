@@ -1,4 +1,4 @@
-class_name PckablePresetProvider extends Node
+class_name PckablePresetProvider extends Object
 
 
 static func get_preset_names() -> PackedStringArray:

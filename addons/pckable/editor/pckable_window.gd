@@ -6,16 +6,16 @@ class_name PckableWindow extends Window
 @export var _catalog_factory: PckableWindowCatalogFactory
 @export var _menu: PckableWindowMenu
 
-var _storage: PckableStorage
-var _item_catalog_dictionary: Dictionary = {}
+var _storage: PckableStorageEditor
+var _item_catalog_name_dictionary: Dictionary = {}
 
 
-func setup(storage: PckableStorage) -> void:
+func setup(storage: PckableStorageEditor) -> void:
 	_storage = storage
 	
-	_catalog_tree.setup(storage, _item_catalog_dictionary)
-	_menu.setup(storage, _item_catalog_dictionary)
-	_catalog_factory.setup(storage)
+	_catalog_tree.setup(storage, _item_catalog_name_dictionary)
+	_menu.setup(storage, _item_catalog_name_dictionary)
+	_catalog_factory.setup(_item_catalog_name_dictionary)
 
 
 func _ready() -> void:
@@ -31,12 +31,13 @@ func _ready() -> void:
 
 
 func _on_request_create_item(catalog_name: String):
-	_catalog_tree.create_catalog(catalog_name)
+	_storage.add_catalog(catalog_name, true)
+	_catalog_tree.create_catalog(catalog_name, "local")
 
 
 func _on_request_tree_refresh():
 	_catalog_tree.clear()
-	_item_catalog_dictionary.clear()
+	_item_catalog_name_dictionary.clear()
 	
 	_catalog_tree.build_tree()
 

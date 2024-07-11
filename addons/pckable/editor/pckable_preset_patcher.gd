@@ -1,4 +1,4 @@
-class_name PckablePresetPatcher extends Node
+class_name PckablePresetPatcher extends Object
 
 
 const PRESET_PATH := "res://export_presets.cfg"

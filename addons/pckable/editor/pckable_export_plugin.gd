@@ -2,20 +2,20 @@ class_name PckableExportPlugin extends EditorExportPlugin
 
 
 const PLUGIN_INCLUDES = [
-	"res://addons/pckable/scripts/pckable_catalog.gd",
+	"res://addons/pckable/scripts/pckable_storage_runtime.gd",
+	"res://addons/pckable/scripts/pckable_storage_base.gd",
 	"res://addons/pckable/scripts/pckable_path_utility.gd",
-	"res://addons/pckable/scripts/pckable_storage.gd",
 	"res://addons/pckable/pckable.gd",
-	"res://pckable_catalogs.json",
+	"res://pckable_manifest.json",
 ]
 
-var _storage: PckableStorage
+var _storage: PckableStorageEditor
 var _build_path: String
 var _original_preset_files: PackedStringArray
 var is_building := false
 
 
-func setup(storage: PckableStorage):
+func setup(storage: PckableStorageEditor):
 	_storage = storage;
 
 
@@ -29,7 +29,8 @@ func _export_begin(features, is_debug, path, flags) -> void:
 	
 	_build_path = PckablePathUtility.get_file_dir(path)
 	
-	PckableExporter.export(_build_path, catalog_names, preset_name, _storage, null)
+	PckableExporter.export(_build_path, catalog_names, preset_name,
+	 _storage, null)
 	
 	var files := PckablePresetProvider.get_preset_resources(preset_name)
 	var export_files := _get_build_files(catalog_names, files)

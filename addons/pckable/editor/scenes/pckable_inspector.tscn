@@ -1,11 +1,11 @@
 [gd_scene load_steps=2 format=3 uid="uid://cwj3v6q5cn1j6"]
 
-[ext_resource type="Script" path="res://addons/pckable/scripts/pckable_inspector.gd" id="1_h2c4i"]
+[ext_resource type="Script" path="res://addons/pckable/editor/pckable_inspector.gd" id="1_ux1xe"]
 
 [node name="PckableInspector" type="VBoxContainer"]
 offset_right = 184.0
 offset_bottom = 24.0
-script = ExtResource("1_h2c4i")
+script = ExtResource("1_ux1xe")
 
 [node name="PckableSwitch" type="HBoxContainer" parent="."]
 layout_mode = 2
@@ -29,3 +29,17 @@ text = "Catalog"
 [node name="OptionButton" type="OptionButton" parent="PckableCatalog"]
 layout_mode = 2
 size_flags_horizontal = 3
+
+[node name="PckableKey" type="HBoxContainer" parent="."]
+visible = false
+layout_mode = 2
+
+[node name="Label" type="Label" parent="PckableKey"]
+layout_mode = 2
+text = "Key"
+
+[node name="LineEdit" type="LineEdit" parent="PckableKey"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "pckable_key"
+select_all_on_focus = true

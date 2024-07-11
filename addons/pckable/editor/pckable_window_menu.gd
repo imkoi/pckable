@@ -13,12 +13,12 @@ signal request_tree_refresh()
 var _file_dialog_resolution: Vector2
 var _file_dialog: EditorFileDialog
 var _export_progress_popup: PckableExportProgressPopup
-var _storage: PckableStorage
+var _storage: PckableStorageEditor
 var _item_catalog_dictionary: Dictionary
 var _viewport_ready: bool
 
 
-func setup(storage: PckableStorage, item_catalog_dictionary: Dictionary):
+func setup(storage: PckableStorageEditor, item_catalog_dictionary: Dictionary):
 	_storage = storage
 	_item_catalog_dictionary = item_catalog_dictionary
 	
@@ -68,8 +68,10 @@ func _export(catalog_names: PackedStringArray) -> void:
 func _exit_tree() -> void:
 	if _file_dialog:
 		_file_dialog.queue_free()
+		_file_dialog = null
 	if _export_progress_popup:
 		_export_progress_popup.queue_free()
+		_export_progress_popup = null
 
 
 func _on_export_all_pressed() -> void:

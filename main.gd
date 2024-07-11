@@ -2,7 +2,7 @@ extends Node
 
 
 func _ready() -> void:
-	pass # Replace with function body.
+	pass
 
 
 func set_texture(tex: Texture2D):

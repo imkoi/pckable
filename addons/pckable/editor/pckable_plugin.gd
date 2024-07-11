@@ -1,27 +1,25 @@
 @tool
 extends EditorPlugin
 
-const PCKABLE_WINDOW_NAME: String = "Open PCKable Window";
-const PCKABLE_SINGLETON_NAME: String = "Pckable";
-const PCKABLE_SINGLETON_PATH: String = "res://addons/pckable/pckable.gd";
-const CATALOG_PATH: String = "res://pckable_catalogs.json";
-const WINDOW_RESOURCE: Resource = preload("res://addons/pckable/scenes/pckable_window.tscn");
-const INSPECTOR_PLUGIN_RESOURCE: Resource = preload("res://addons/pckable/scripts/pckable_inspector_plugin.gd");
-const EXPORT_PLUGIN_RESOURCE: Resource = preload("res://addons/pckable/scripts/pckable_export_plugin.gd");
+const PCKABLE_WINDOW_NAME: String = "Open PCKable Window"
+const PCKABLE_SINGLETON_NAME: String = "Pckable"
+const PCKABLE_SINGLETON_PATH: String = "res://addons/pckable/runtime/pckable.gd"
+const CATALOG_PATH: String = "res://pckable_catalogs.json"
+const WINDOW_RESOURCE: Resource = preload("res://addons/pckable/editor/scenes/pckable_window.tscn")
+const INSPECTOR_PLUGIN_RESOURCE: Resource = preload("res://addons/pckable/editor/pckable_inspector_plugin.gd")
+const EXPORT_PLUGIN_RESOURCE: Resource = preload("res://addons/pckable/editor/pckable_export_plugin.gd")
 
-var window: PckableWindow;
-var inspector_plugin: PckableInspectorPlugin;
-var export_plugin: PckableExportPlugin;
-var storage: PckableStorage;
-var catalogs: Dictionary;
+var window: PckableWindow
+var inspector_plugin: PckableInspectorPlugin
+var export_plugin: PckableExportPlugin
+var storage: PckableStorageEditor
+var catalogs: Dictionary
 
 
 func _enter_tree() -> void:
-	storage = PckableStorage.new()
+	storage = PckableStorageEditor.new()
 	
-	if not storage.setup():
-		push_error("Not able to initialize plugin")
-		return
+	storage.setup()
 	
 	add_autoload_singleton(PCKABLE_SINGLETON_NAME, PCKABLE_SINGLETON_PATH)
 	

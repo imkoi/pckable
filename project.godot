@@ -17,7 +17,7 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-Pckable="*res://addons/pckable/pckable.gd"
+Pckable="*res://addons/pckable/runtime/pckable.gd"
 
 [debug]
 

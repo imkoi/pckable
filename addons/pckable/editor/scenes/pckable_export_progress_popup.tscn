@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://67lwk23hragu"]
 
-[ext_resource type="Script" path="res://addons/pckable/scripts/pckable_export_progress_popup.gd" id="1_067e6"]
+[ext_resource type="Script" path="res://addons/pckable/editor/pckable_export_progress_popup.gd" id="1_x3v0w"]
 
 [node name="Popup" type="PopupPanel" node_paths=PackedStringArray("_label")]
 title = "Pckable Export Window"
@@ -8,7 +8,7 @@ initial_position = 1
 size = Vector2i(320, 100)
 visible = true
 borderless = false
-script = ExtResource("1_067e6")
+script = ExtResource("1_x3v0w")
 _label = NodePath("Control/VBoxContainer/Label")
 
 [node name="Control" type="Control" parent="."]
@@ -18,8 +18,8 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 4.0
 offset_top = 4.0
-offset_right = -4.0
-offset_bottom = -4.0
+offset_right = 316.0
+offset_bottom = 96.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 3
