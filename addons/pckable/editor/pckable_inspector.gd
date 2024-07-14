@@ -9,6 +9,7 @@ class_name PackefierInspector extends VBoxContainer
 @onready var line_edit: LineEdit = $PckableKey/LineEdit
 
 var _path: String
+var _catalog: String
 var _key: String
 var _catalogs_names: PackedStringArray
 var _linked: bool
@@ -17,9 +18,10 @@ var _previous_option_index := -1
 signal save_requested(key, catalog_name, enabled)
 
 
-func setup(path: String, key: String,
+func setup(path: String, catalog: String, key: String,
  catalog_names: PackedStringArray, linked: bool) -> void:
 	_path = path
+	_catalog = catalog
 	_key = key
 	_catalogs_names = catalog_names
 	_linked = linked
@@ -30,8 +32,20 @@ func _ready() -> void:
 	key_container.set_visible(_linked)
 	catalog_container.set_visible(_linked)
 	
+	var selected_index := 0
+	
 	for catalog_name in _catalogs_names:
 		option_button.add_item(catalog_name)
+		
+		if catalog_name == _catalog:
+			_previous_option_index = selected_index
+			break;
+		selected_index += 1
+	
+	if _previous_option_index >= 0:
+		option_button.select(selected_index)
+	
+	line_edit.set_text(_key)
 	
 	check_button.toggled.connect(_on_toggled)
 	option_button.item_selected.connect(_on_item_selected)

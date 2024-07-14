@@ -204,4 +204,3 @@ func _on_request_completed(result: int, response_code: int,
 func _try_init() -> void:
 	if not _storage:
 		_storage = PckableStorageRuntime.new();
-		_storage.setup()

@@ -47,30 +47,6 @@ func _ready() -> void:
 	_export_progress_popup = _export_progress_popup_scene.instantiate()
 
 
-func _export(catalog_names: PackedStringArray,
- export_project: bool) -> void:
-	if not _viewport_ready:
-		var viewport = get_viewport()
-		
-		viewport.add_child(_file_dialog)
-		viewport.add_child(_export_progress_popup)
-		_viewport_ready = true
-	
-	_file_dialog.popup_centered(_file_dialog_resolution)
-	
-	var dir_selected = await _file_dialog.dir_selected
-	var preset_index := _preset_button.get_selected_id()
-	var preset_name = _preset_button.get_item_text(preset_index)
-	
-	if export_project:
-		PckableExporter.export_catalogs(dir_selected,
-		 catalog_names, preset_name,
-		 _storage, _export_progress_popup)
-	
-	PckableExporter.export_catalogs(dir_selected, catalog_names,
-	 preset_name, _storage, _export_progress_popup)
-
-
 func _exit_tree() -> void:
 	if _file_dialog:
 		_file_dialog.queue_free()
@@ -86,7 +62,24 @@ func _on_export_project_pressed() -> void:
 	for catalog_name in _item_catalog_dictionary.values():
 		catalog_names.push_back(catalog_name as String)
 	
-	_export(catalog_names, true)
+	var preset_index := _preset_button.get_selected_id()
+	var preset_name = _preset_button.get_item_text(preset_index)
+	
+	_try_setup_viewport()
+	
+	var executable_path := PckablePresetProvider.get_export_path(
+		preset_name)
+	var dir_path := PckablePathUtility.get_file_dir(executable_path)
+	var absolute_dir_path := ProjectSettings.globalize_path(dir_path)
+	
+	if not DirAccess.open(absolute_dir_path):
+		DirAccess.make_dir_absolute(absolute_dir_path)
+	
+	await PckableExporter.export_catalogs(absolute_dir_path,
+	 catalog_names, preset_name, _storage, _export_progress_popup)
+	
+	await PckableExporter.export_project(executable_path,
+	 dir_path, preset_name, _storage, _export_progress_popup)
 
 
 func _on_export_catalogs_pressed() -> void:
@@ -102,8 +95,26 @@ func _on_export_catalogs_pressed() -> void:
 		for catalog_name in _item_catalog_dictionary.values():
 			catalog_names.push_back(catalog_name as String)
 	
-	_export(catalog_names, false)
+	_try_setup_viewport()
+	
+	_file_dialog.popup_centered(_file_dialog_resolution)
+	
+	var dir_selected = await _file_dialog.dir_selected
+	var preset_index := _preset_button.get_selected_id()
+	var preset_name = _preset_button.get_item_text(preset_index)
+	
+	await PckableExporter.export_catalogs(dir_selected, catalog_names,
+	 preset_name, _storage, _export_progress_popup)
 
 
 func _on_refresh_pressed() -> void:
 	request_tree_refresh.emit()
+
+
+func _try_setup_viewport() -> void:
+	if not _viewport_ready:
+		var viewport = get_viewport()
+		
+		viewport.add_child(_file_dialog)
+		viewport.add_child(_export_progress_popup)
+		_viewport_ready = true

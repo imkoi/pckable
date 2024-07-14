@@ -35,9 +35,6 @@ func _can_handle(object : Object) -> bool:
 	if EXCLUDED_FILES.has(_path):
 		_path = String()
 	
-	if _path.length() > min_path_lenght:
-		print(_path)
-	
 	return _path.length() > min_path_lenght
 
 
@@ -49,9 +46,10 @@ func _parse_begin(object : Object) -> void:
 	
 	var inspector_instance := INSPECTOR_RESOURCE.instantiate() as PackefierInspector
 	var linked := not _storage.get_catalog_name_by_path(_path).is_empty()
-	var key := _storage.get_path_by_key(_path)
+	var key := _storage.get_key_by_path(_path)
+	var catalog := _storage.get_catalog_name_by_path(_path)
 	
-	inspector_instance.setup(_path, key, catalog_names, linked)
+	inspector_instance.setup(_path, catalog, key, catalog_names, linked)
 	inspector_instance.save_requested.connect(on_save_requested)
 	
 	add_custom_control(inspector_instance)

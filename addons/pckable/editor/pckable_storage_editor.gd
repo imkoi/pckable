@@ -126,9 +126,7 @@ func get_catalog_resources(catalog_name: String) -> Array:
 	var resources := []
 	
 	for catalog in _catalogs:
-		var suspect_catalog_name = catalog[NAME_KEY]
-		
-		if catalog_name == suspect_catalog_name:
+		if catalog_name == catalog[NAME_KEY]:
 			for resource in catalog[RESOURCES_KEY]:
 				resources.push_back(resource)
 			break

@@ -37,6 +37,24 @@ static func get_preset_resources(preset_name: String) -> PackedStringArray:
 	return resources
 
 
+static func get_export_path(preset_name: String) -> String:
+	var config = get_preset_config()
+	
+	for section in config.get_sections():
+		if not config.has_section_key(section, "name"):
+			continue
+		
+		if preset_name != config.get_value(section, "name"):
+			continue
+		
+		if not config.has_section_key(section, "export_path"):
+			break
+		
+		return config.get_value(section, "export_path")
+	
+	return String()
+
+
 static func get_preset_config() -> ConfigFile:
 	var config = ConfigFile.new()
 	

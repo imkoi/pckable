@@ -19,14 +19,14 @@ var catalogs: Dictionary
 
 
 func _enter_tree() -> void:
+	if _exporting_now():
+		return
+	
 	storage = PckableStorageEditor.new()
 	
 	storage.setup()
 	
 	add_autoload_singleton(PCKABLE_SINGLETON_NAME, PCKABLE_SINGLETON_PATH)
-	
-	if _exporting_now():
-		return
 	
 	dock = DOCK_RESOURCE.instantiate()
 	dock.setup(storage)
@@ -38,7 +38,7 @@ func _enter_tree() -> void:
 	export_plugin.setup(storage)
 	
 	add_inspector_plugin(inspector_plugin)
-	add_export_plugin(export_plugin)
+	#add_export_plugin(export_plugin)
 	add_tool_menu_item(PCKABLE_WINDOW_NAME, _open_window)
 	add_control_to_dock(2, dock)
 
@@ -50,7 +50,7 @@ func _exit_tree() -> void:
 		return
 		
 	remove_inspector_plugin(inspector_plugin)
-	remove_export_plugin(export_plugin)
+	#remove_export_plugin(export_plugin)
 	remove_tool_menu_item(PCKABLE_WINDOW_NAME)
 	remove_control_from_docks(dock)
 	
@@ -82,4 +82,5 @@ func _open_window() -> void:
 
 
 func _exporting_now() -> bool:
-	return OS.get_cmdline_args().has("--export-pack")
+	var args := OS.get_cmdline_args()
+	return args.has("--export-pack") || args.has("--export-release")
