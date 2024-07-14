@@ -43,7 +43,7 @@ func load_resources_from_manifest(catalogs: Array) -> void:
 			var path := resource.path as String
 			
 			_key_to_path[resource.key] = path
-			_path_to_catalog_name[path] = catalog_name;
+			_path_to_catalog_name[path] = catalog_name
 
 
 func save_catalogs(path: String, catalogs: Array) -> Array:

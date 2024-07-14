@@ -31,8 +31,8 @@ func load_resource(key: String, timeout_msec: int = 60000) -> Resource:
 	_try_init()
 	
 	var path := _storage.get_path_by_key(key)
-	var catalog_name := _storage.get_catalog_name_by_path(key)
-	
+	var catalog_name := _storage.get_catalog_name_by_path(path)
+
 	await _load_catalog(catalog_name, timeout_msec)
 	
 	var main_loop = Engine.get_main_loop();
@@ -58,9 +58,8 @@ func load_resources(keys: PackedStringArray,
 	_try_init()
 	
 	var catalogs_to_load := PackedStringArray()
-	var paths = PackedStringArray()
+	var paths := PackedStringArray()
 	
-	catalogs_to_load.resize(4)
 	paths.resize(keys.size())
 	
 	for i in keys.size():
@@ -80,17 +79,19 @@ func load_resources(keys: PackedStringArray,
 	
 	while not _all_resources_loaded(paths):
 		await main_loop.process_frame
-	
+
 	var results := {}
 	
-	for path in paths:
+	for i in paths.size():
+		var path := paths[i]
+		
 		match ResourceLoader.load_threaded_get_status(path):
 			0:
 				push_error("invalid path %s" % path)
 			2: 
 				push_error("load path failed %s" % path)
 			_:
-				results[path] = ResourceLoader.load_threaded_get(path)
+				results[keys[i]] = ResourceLoader.load_threaded_get(path)
 	
 	return results
 
@@ -105,14 +106,13 @@ func _all_resources_loaded(paths: PackedStringArray) -> bool:
 	return loaded_resources == paths.size()
 
 
-func _load_catalog(catalog_name: StringName, timeout_msec: int = 60000) -> bool:
-	if not _storage:
-		_storage = PckableStorageRuntime.new();
-		_storage.setup()
-
-	var catalog_address := _storage.get_catalog_address(catalog_name)
+func _load_catalog(catalog_name: StringName,
+ timeout_msec: int = 60000) -> bool:
+	if catalog_name.length() == 0:
+		push_error("catalog name could not be empty")
+		return false
 	
-	print(catalog_address)
+	var catalog_address := _storage.get_catalog_address(catalog_name)
 	
 	if catalog_address.length() > 0 and catalog_address != "local":
 		print("start downloading %s" % catalog_name)
@@ -204,3 +204,4 @@ func _on_request_completed(result: int, response_code: int,
 func _try_init() -> void:
 	if not _storage:
 		_storage = PckableStorageRuntime.new();
+		_storage.setup()

@@ -1,18 +1,26 @@
 extends Node
 
 
-var _main_scene: PackedScene
+var _main_scene = PackedScene
+var _cat_texture = Texture2D
 
 
 func _ready() -> void:
-	_main_scene = await Pckable.load_resource("main_scene")
+	#_main_scene = await Pckable.load_resource("main_scene")
+	#_main_scene = await Pckable.load_resource("my_cat")
 	
-	var main = _main_scene.instantiate()
+	var loaded = await Pckable.load_resources(["main_scene", "my_cat"])
 	
-	var tex = await Pckable.load_resource("my_cat") as Texture2D
+	if loaded.has("main_scene"):
+		_main_scene = loaded["main_scene"]
 	
-	main.set_texture(tex)
-	add_child(main)
+	if loaded.has("my_cat"):
+		_cat_texture = loaded["my_cat"]
+	
+	var main_node = _main_scene.instantiate()
+	
+	main_node.set_texture(_cat_texture)
+	add_child(main_node)
 
 
 func api_usage() -> void:
