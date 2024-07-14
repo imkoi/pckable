@@ -66,7 +66,7 @@ func build_tree() -> void:
 	for catalog_name in catalog_names:
 		var catalog_address := _storage.get_catalog_address(catalog_name)
 		var catalog_resources = _storage.get_catalog_resources(catalog_name)
-		var catalog_item := create_catalog(catalog_name, catalog_address)
+		var catalog_item := _create_catalog(catalog_name, catalog_address)
 		
 		for resource in catalog_resources:
 			var resource_item = create_item(catalog_item)
@@ -89,7 +89,7 @@ func rebuild_tree() -> void:
 	build_tree()
 
 
-func create_catalog(catalog_name: String, catalog_address: String) -> TreeItem:
+func _create_catalog(catalog_name: String, catalog_address: String) -> TreeItem:
 	var catalog_item := create_item();
 	
 	catalog_item.set_text(0, catalog_name)

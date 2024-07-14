@@ -1,7 +1,7 @@
 class_name PckableStorageEditor extends PckableStorageBase
 
 
-signal catalogs_changed()
+signal changed()
 
 
 func setup() -> void:
@@ -29,7 +29,7 @@ func add_catalog(catalog_name: String, force_save = false) -> void:
 	if force_save:
 		force_save_catalogs()
 	
-	catalogs_changed.emit()
+	changed.emit()
 
 
 func remove_catalog(catalog_name: String, force_save = false) -> bool:
@@ -54,7 +54,7 @@ func remove_catalog(catalog_name: String, force_save = false) -> bool:
 		if force_save:
 			force_save_catalogs()
 		
-		catalogs_changed.emit()
+		changed.emit()
 		
 		return true
 	
@@ -78,7 +78,7 @@ func add_resource_to_catalog(key: String, path: String, catalog_name: String, fo
 			if force_save:
 				force_save_catalogs()
 			
-			catalogs_changed.emit()
+			changed.emit()
 			
 			return true
 	
@@ -97,7 +97,7 @@ func remove_resource_from_catalog(path: String, catalog_name: String, force_save
 			if force_save:
 				force_save_catalogs()
 			
-			catalogs_changed.emit()
+			changed.emit()
 			
 			return true
 	

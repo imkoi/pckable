@@ -9,75 +9,81 @@ class_name PackefierInspector extends VBoxContainer
 @onready var line_edit: LineEdit = $PckableKey/LineEdit
 
 var _path: String
-var _catalog: String
-var _key: String
-var _catalogs_names: PackedStringArray
-var _linked: bool
-var _previous_option_index := -1
+var _storage: PckableStorageEditor
+var _previous_catalog_index := -1
+var _previous_key := String()
 
 signal save_requested(key, catalog_name, enabled)
 
 
-func setup(path: String, catalog: String, key: String,
- catalog_names: PackedStringArray, linked: bool) -> void:
+func setup(path: String, storage: PckableStorageEditor) -> void:
 	_path = path
-	_catalog = catalog
-	_key = key
-	_catalogs_names = catalog_names
-	_linked = linked
+	_storage = storage
 
 
 func _ready() -> void:
-	check_button.set_pressed(_linked)
-	key_container.set_visible(_linked)
-	catalog_container.set_visible(_linked)
-	
-	var selected_index := 0
-	
-	for catalog_name in _catalogs_names:
-		option_button.add_item(catalog_name)
-		
-		if catalog_name == _catalog:
-			_previous_option_index = selected_index
-		selected_index += 1
-	
-	if _previous_option_index >= 0:
-		option_button.select(_previous_option_index)
-	
-	line_edit.set_text(_key)
+	_on_storage_changed()
 	
 	check_button.toggled.connect(_on_toggled)
-	option_button.item_selected.connect(_on_item_selected)
+	option_button.item_selected.connect(_on_catalog_selected)
 	line_edit.text_submitted.connect(_on_key_submitted)
+	_storage.changed.connect(_on_storage_changed)
 
 
 func _on_toggled(enabled : bool) -> void:
 	var catalog_name := _get_catalog_name(option_button.selected)
-	
+
 	catalog_container.set_visible(enabled)
 	key_container.set_visible(enabled)
-	save_requested.emit(_key, catalog_name, enabled)
+	
+	if not _previous_key.is_empty():
+		save_requested.emit(_previous_key, catalog_name, enabled)
 
 
-func _on_item_selected(item_index: int) -> void:
+func _on_catalog_selected(item_index: int) -> void:
 	var catalog_name := String()
 	
-	if _previous_option_index >= 0:
-		catalog_name = _get_catalog_name(_previous_option_index)
-		save_requested.emit(_key, catalog_name, false)
+	if _previous_catalog_index >= 0:
+		catalog_name = _get_catalog_name(_previous_catalog_index)
+		save_requested.emit(_previous_key, catalog_name, false)
 	
 	catalog_name = _get_catalog_name(option_button.selected)
-	save_requested.emit(_key, catalog_name, check_button.is_pressed())
+	save_requested.emit(_previous_key, catalog_name, check_button.is_pressed())
 	
-	_previous_option_index = option_button.selected
+	_previous_catalog_index = option_button.selected
 
 
 func _on_key_submitted(key: String) -> void:
 	var catalog_name := _get_catalog_name(option_button.selected)
-	save_requested.emit(_key, catalog_name, false)
+	save_requested.emit(_previous_key, catalog_name, false)
 	save_requested.emit(key, catalog_name, check_button.is_pressed())
+
+
+func _on_storage_changed():
+	option_button.clear()
 	
-	_key = key
+	var linked := not _storage.get_catalog_name_by_path(_path).is_empty()
+	_previous_key = _storage.get_key_by_path(_path)
+	var catalog := _storage.get_catalog_name_by_path(_path)
+	var catalog_names := _storage.get_catalog_names()
+	
+	check_button.set_pressed(linked)
+	key_container.set_visible(linked)
+	catalog_container.set_visible(linked)
+	
+	var selected_index := 0
+	
+	for catalog_name in catalog_names:
+		option_button.add_item(catalog_name)
+		
+		if catalog_name == catalog:
+			_previous_catalog_index = selected_index
+		selected_index += 1
+	
+	if _previous_catalog_index >= 0:
+		option_button.select(_previous_catalog_index)
+	
+	line_edit.set_text(_previous_key)
 
 
 func _get_catalog_name(option_index: int) -> String:

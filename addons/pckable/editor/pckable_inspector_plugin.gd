@@ -39,17 +39,10 @@ func _can_handle(object : Object) -> bool:
 
 
 func _parse_begin(object : Object) -> void:
-	var catalog_names := _storage.get_catalog_names()
-	
-	if catalog_names.size() == 0:
-		return
-	
 	var inspector_instance := INSPECTOR_RESOURCE.instantiate() as PackefierInspector
-	var linked := not _storage.get_catalog_name_by_path(_path).is_empty()
-	var key := _storage.get_key_by_path(_path)
-	var catalog := _storage.get_catalog_name_by_path(_path)
 	
-	inspector_instance.setup(_path, catalog, key, catalog_names, linked)
+	
+	inspector_instance.setup(_path, _storage)
 	inspector_instance.save_requested.connect(on_save_requested)
 	
 	add_custom_control(inspector_instance)
