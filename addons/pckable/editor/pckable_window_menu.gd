@@ -2,8 +2,8 @@
 class_name PckableWindowMenu extends Node
 
 
-@export var _export_all_button : Button
-@export var _export_selected_button : Button
+@export var _export_project_button : Button
+@export var _export_catalogs_button : Button
 @export var _preset_button: OptionButton
 @export var _refresh_button : Button
 @export var _export_progress_popup_scene: PackedScene
@@ -31,8 +31,8 @@ func setup(storage: PckableStorageEditor, item_catalog_dictionary: Dictionary):
 
 
 func _ready() -> void:
-	_export_all_button.pressed.connect(_on_export_all_pressed)
-	_export_selected_button.pressed.connect(_on_export_selected_pressed)
+	_export_project_button.pressed.connect(_on_export_project_pressed)
+	_export_catalogs_button.pressed.connect(_on_export_catalogs_pressed)
 	_refresh_button.pressed.connect(_on_refresh_pressed)
 	
 	_file_dialog_resolution = Vector2(
@@ -47,7 +47,8 @@ func _ready() -> void:
 	_export_progress_popup = _export_progress_popup_scene.instantiate()
 
 
-func _export(catalog_names: PackedStringArray) -> void:
+func _export(catalog_names: PackedStringArray,
+ export_project: bool) -> void:
 	if not _viewport_ready:
 		var viewport = get_viewport()
 		
@@ -61,8 +62,13 @@ func _export(catalog_names: PackedStringArray) -> void:
 	var preset_index := _preset_button.get_selected_id()
 	var preset_name = _preset_button.get_item_text(preset_index)
 	
-	PckableExporter.export(dir_selected, catalog_names, preset_name,
-	 _storage, _export_progress_popup)
+	if export_project:
+		PckableExporter.export_catalogs(dir_selected,
+		 catalog_names, preset_name,
+		 _storage, _export_progress_popup)
+	
+	PckableExporter.export_catalogs(dir_selected, catalog_names,
+	 preset_name, _storage, _export_progress_popup)
 
 
 func _exit_tree() -> void:
@@ -74,25 +80,29 @@ func _exit_tree() -> void:
 		_export_progress_popup = null
 
 
-func _on_export_all_pressed() -> void:
+func _on_export_project_pressed() -> void:
 	var catalog_names := PackedStringArray()
 	
 	for catalog_name in _item_catalog_dictionary.values():
 		catalog_names.push_back(catalog_name as String)
 	
-	_export(catalog_names)
+	_export(catalog_names, true)
 
 
-func _on_export_selected_pressed() -> void:
-	var selected_catalogs := PackedStringArray()
+func _on_export_catalogs_pressed() -> void:
+	var catalog_names := PackedStringArray()
 	
 	for tree_item in _item_catalog_dictionary:
 		if tree_item.is_selected(0) or tree_item.is_selected(1):
 			var catalog_name := _item_catalog_dictionary[tree_item] as String
 			
-			selected_catalogs.push_back(catalog_name)
+			catalog_names.push_back(catalog_name)
 	
-	_export(selected_catalogs)
+	if catalog_names.size() == 0:
+		for catalog_name in _item_catalog_dictionary.values():
+			catalog_names.push_back(catalog_name as String)
+	
+	_export(catalog_names, false)
 
 
 func _on_refresh_pressed() -> void:

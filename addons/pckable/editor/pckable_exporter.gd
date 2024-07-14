@@ -4,7 +4,7 @@ class_name PckableExporter extends Node
 const ARGS := "\"%s\" --headless --path \"%s\" --export-pack \"%s\" \"%s\""
 
 
-static func export(path: String, catalog_names: PackedStringArray,
+static func export_catalogs(path: String, catalog_names: PackedStringArray,
  preset_name: String, storage: PckableStorageEditor,
  progress_popup: PckableExportProgressPopup) -> void:
 	var popup_resolution = Vector2(

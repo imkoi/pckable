@@ -1,1 +1,1 @@
-[]
+[{"address":"local","name":"cat_catalog","resources":[{"key":"my_cat","path":"res://sample/Exotic_cat_transparent.png"}]},{"address":"local","name":"main_catalog","resources":[{"key":"main_scene","path":"res://sample/main.tscn"}]}]

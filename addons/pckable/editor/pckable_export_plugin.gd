@@ -29,7 +29,7 @@ func _export_begin(features, is_debug, path, flags) -> void:
 	
 	_build_path = PckablePathUtility.get_file_dir(path)
 	
-	PckableExporter.export(_build_path, catalog_names, preset_name,
+	PckableExporter.export_catalogs(_build_path, catalog_names, preset_name,
 	 _storage, null)
 	
 	var files := PckablePresetProvider.get_preset_resources(preset_name)

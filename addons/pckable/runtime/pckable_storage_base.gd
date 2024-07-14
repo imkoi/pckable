@@ -13,21 +13,24 @@ var _key_to_path: Dictionary = {}
 
 func load_manifest_by_path(path: String):
 	if not FileAccess.file_exists(path):
+		print("manifest file not found")
 		return null
 	
 	var file := FileAccess.open(path, FileAccess.READ)
 	
 	if not file:
+		print("failed to open manifest file not found")
 		return null
 	
 	var file_content := file.get_as_text()
-	file.close()
-	
+
 	var json := JSON.new()
 	var error := json.parse(file_content)
 	
 	if error == OK:
 		return json.data as Array
+	
+	push_error("corrupted json %s" % file_content) 
 	
 	return null
 
@@ -35,13 +38,11 @@ func load_manifest_by_path(path: String):
 func load_resources_from_manifest(catalogs: Array) -> void:
 	for catalog in catalogs:
 		var catalog_name := catalog[NAME_KEY] as String
-		var resources := catalog[RESOURCES_KEY] as Array
 		
-		for resource in resources:
-			var key := resource.key as String
+		for resource in catalog[RESOURCES_KEY]:
 			var path := resource.path as String
 			
-			_key_to_path[key] = path
+			_key_to_path[resource.key] = path
 			_path_to_catalog_name[path] = catalog_name;
 
 
@@ -49,7 +50,6 @@ func save_catalogs(path: String, catalogs: Array) -> Array:
 	var file := FileAccess.open(path, FileAccess.WRITE_READ)
 	
 	file.store_string(JSON.stringify(catalogs))
-	file.close()
 	
 	return catalogs
 

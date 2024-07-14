@@ -1,0 +1,90 @@
+[gd_scene load_steps=10 format=3 uid="uid://dtk2173253nb4"]
+
+[ext_resource type="Script" path="res://addons/pckable/editor/pckable_control.gd" id="1_uq87i"]
+[ext_resource type="Script" path="res://addons/pckable/editor/pckable_window_menu.gd" id="2_bk84o"]
+[ext_resource type="PackedScene" uid="uid://67lwk23hragu" path="res://addons/pckable/editor/scenes/pckable_export_progress_popup.tscn" id="3_i7x6p"]
+[ext_resource type="Script" path="res://addons/pckable/editor/pckable_window_catalog_factory.gd" id="4_cuj1c"]
+[ext_resource type="Texture2D" uid="uid://b6wnrcrgpfs05" path="res://addons/pckable/editor/resources/refresh.svg" id="4_jdws3"]
+[ext_resource type="Script" path="res://addons/pckable/editor/pckable_window_catalog_tree.gd" id="5_hxmn3"]
+[ext_resource type="Texture2D" uid="uid://bilktifulkm7p" path="res://addons/pckable/editor/resources/add.svg" id="5_m3rsd"]
+[ext_resource type="Texture2D" uid="uid://sgqu0a07mbxo" path="res://addons/pckable/editor/resources/remove.svg" id="6_eytwl"]
+[ext_resource type="Texture2D" uid="uid://6830r5hvk5vq" path="res://addons/pckable/editor/resources/file.svg" id="7_qyfb2"]
+
+[node name="Pckable" type="Control" node_paths=PackedStringArray("_catalog_tree", "_catalog_factory", "_menu")]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 1280.0
+offset_bottom = 720.0
+script = ExtResource("1_uq87i")
+_catalog_tree = NodePath("Control/VerticalContainer/CatalogTree")
+_catalog_factory = NodePath("Control/VerticalContainer/CatalogFactory")
+_menu = NodePath("Control/VerticalContainer/MenuBar")
+
+[node name="Control" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="VerticalContainer" type="VBoxContainer" parent="Control"]
+layout_mode = 2
+
+[node name="MenuBar" type="HBoxContainer" parent="Control/VerticalContainer" node_paths=PackedStringArray("_export_project_button", "_export_catalogs_button", "_preset_button", "_refresh_button")]
+layout_mode = 2
+script = ExtResource("2_bk84o")
+_export_project_button = NodePath("ExportProject")
+_export_catalogs_button = NodePath("ExportCatalogs")
+_preset_button = NodePath("PresetButton")
+_refresh_button = NodePath("Right/Refresh")
+_export_progress_popup_scene = ExtResource("3_i7x6p")
+
+[node name="ExportProject" type="Button" parent="Control/VerticalContainer/MenuBar"]
+layout_mode = 2
+text = "Export Project"
+
+[node name="ExportCatalogs" type="Button" parent="Control/VerticalContainer/MenuBar"]
+layout_mode = 2
+text = "Export Catalogs"
+
+[node name="PresetButton" type="OptionButton" parent="Control/VerticalContainer/MenuBar"]
+layout_mode = 2
+
+[node name="Right" type="HBoxContainer" parent="Control/VerticalContainer/MenuBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 2
+
+[node name="Refresh" type="Button" parent="Control/VerticalContainer/MenuBar/Right"]
+layout_mode = 2
+icon = ExtResource("4_jdws3")
+
+[node name="CatalogFactory" type="HBoxContainer" parent="Control/VerticalContainer"]
+layout_mode = 2
+script = ExtResource("4_cuj1c")
+
+[node name="LineEdit" type="LineEdit" parent="Control/VerticalContainer/CatalogFactory"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "new_catalog_name"
+
+[node name="Button" type="Button" parent="Control/VerticalContainer/CatalogFactory"]
+layout_mode = 2
+icon = ExtResource("5_m3rsd")
+
+[node name="CatalogTree" type="Tree" parent="Control/VerticalContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+columns = 2
+column_titles_visible = true
+select_mode = 2
+scroll_horizontal_enabled = false
+script = ExtResource("5_hxmn3")
+_remove_texture = ExtResource("6_eytwl")
+_file_texture = ExtResource("7_qyfb2")
+_catalog_text_color = Color(0.909011, 0.912522, 0.919529, 1)
+_resource_text_color = Color(0.754191, 0.763951, 0.773699, 1)

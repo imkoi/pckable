@@ -24,8 +24,39 @@ func _ready() -> void:
 	button_clicked.connect(_on_item_clicked)
 
 
+func _drop_data(at_position: Vector2, data: Variant):
+	var dropable_paths := PackedStringArray()
+	
+	print("_drop_data")
+	var file_paths = data["files"]
+	for path in file_paths:
+		print(path)
+		#var item_len = get_item_count()
+		#add_item(path.get_file().get_basename())
+		#set_item_metadata(item_len, path)
+
+
+func _can_drop_data(at_position: Vector2, data: Variant):
+	var dropable_paths := PackedStringArray()
+
+	var file_paths = data["files"]
+	for path in file_paths:
+		if path.begins_with("res://addons/"):
+			return false
+		
+		if path.ends_with("/"):
+			var dir := DirAccess.open(path)
+			dir.set_include_hidden(false)
+			
+			return dir.get_files().size() > 0
+	
+	return false
+
+
 func build_tree() -> void:
 	var catalog_names := _storage.get_catalog_names()
+	
+	set_hide_root(true)
 	
 	var root := create_item()
 	root.set_text(0, "catalogs")

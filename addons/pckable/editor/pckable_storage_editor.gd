@@ -4,9 +4,12 @@ class_name PckableStorageEditor extends PckableStorageBase
 func setup() -> void:
 	var catalogs = load_manifest_by_path(MANIFEST_PATH)
 	if not catalogs:
+		print("catalogs not found")
 		catalogs = save_catalogs(MANIFEST_PATH, [])
 	
 	load_resources_from_manifest(catalogs)
+	
+	_catalogs = catalogs
 
 
 func add_catalog(catalog_name: String, force_save = false) -> void:
@@ -18,30 +21,32 @@ func add_catalog(catalog_name: String, force_save = false) -> void:
 	
 	_catalogs.push_back(new_catalog)
 	
+	print("added catalog %s" % catalog_name)
+	
 	if force_save:
 		force_save_catalogs()
-	
-	print("added catalog %s" % catalog_name)
 
 
 func remove_catalog(catalog_name: String, force_save = false) -> bool:
 	var remove_index := -1
 	
 	for catalog in _catalogs:
-		var suspect_catalog_name = catalog[NAME_KEY]
-		
 		remove_index += 1
+		
+		var suspect_catalog_name = catalog[NAME_KEY]
 		
 		if suspect_catalog_name != catalog_name:
 			continue
 		
 		for resource in catalog[RESOURCES_KEY]:
-			_path_to_catalog_name.erase(resource)
+			_key_to_path.erase(resource.key)
+			_path_to_catalog_name.erase(resource.path)
 		
 		_catalogs.remove_at(remove_index)
-		force_save_catalogs()
 		
 		print("removed catalog %s" % catalog_name)
+		
+		force_save_catalogs()
 		
 		return true
 	
@@ -76,8 +81,8 @@ func remove_resource_from_catalog(path: String, catalog_name: String, force_save
 			var key = get_key_by_path(path)
 			catalog[RESOURCES_KEY].erase({"key" : key, "path" : path})
 			
-			_path_to_catalog_name.erase(path)
 			_key_to_path.erase(key)
+			_path_to_catalog_name.erase(path)
 			
 			if force_save:
 				force_save_catalogs()
@@ -107,7 +112,7 @@ func set_catalog_address(catalog_name: String, address: String,
 
 
 func get_catalog_names() -> PackedStringArray:
-	var catalog_names = PackedStringArray()
+	var catalog_names := PackedStringArray()
 	
 	for catalog in _catalogs:
 		var catalog_name = catalog[NAME_KEY]
@@ -133,17 +138,15 @@ func get_catalog_resources(catalog_name: String) -> Array:
 
 func catalog_exist(catalog_name: String) -> bool:
 	for catalog in _catalogs:
-		var suspect_catalog_name := catalog[PckableStorageEditor.NAME_KEY] as String
-		
-		if suspect_catalog_name == catalog_name:
+		if catalog[PckableStorageEditor.NAME_KEY] == catalog_name:
 			return true
+	
 	return false
 
 
 func force_save_catalogs():
-	var json_string = JSON.stringify(_catalogs)
-	
-	var file = FileAccess.open(MANIFEST_PATH, FileAccess.WRITE)
+	var json_string := JSON.stringify(_catalogs)
+	var file := FileAccess.open(MANIFEST_PATH, FileAccess.WRITE)
 	
 	file.store_string(json_string)
 	file.close();

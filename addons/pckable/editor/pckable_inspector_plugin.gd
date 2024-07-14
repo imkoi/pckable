@@ -35,6 +35,9 @@ func _can_handle(object : Object) -> bool:
 	if EXCLUDED_FILES.has(_path):
 		_path = String()
 	
+	if _path.length() > min_path_lenght:
+		print(_path)
+	
 	return _path.length() > min_path_lenght
 
 
