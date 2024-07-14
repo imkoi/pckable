@@ -61,11 +61,14 @@ func remove_catalog(catalog_name: String, force_save = false) -> bool:
 	return false
 
 
-func add_resource_to_catalog(key: String, path: String, catalog_name: String, force_save: bool = false) -> bool:
+func add_resource_to_catalog(key: String, path: String,
+ catalog_name: String, force_save: bool = false,
+ emit_changed: bool = true) -> bool:
 	if _path_to_catalog_name.has(path):
 		var previous_catalog = _path_to_catalog_name[path]
 		
-		remove_resource_from_catalog(path, previous_catalog)
+		remove_resource_from_catalog(path, previous_catalog,
+		 false, false)
 	
 	for catalog in _catalogs:
 		var suspect_catalog_name = catalog[NAME_KEY]
@@ -78,14 +81,16 @@ func add_resource_to_catalog(key: String, path: String, catalog_name: String, fo
 			if force_save:
 				force_save_catalogs()
 			
-			changed.emit()
+			if emit_changed:
+				changed.emit()
 			
 			return true
 	
 	return false
 
 
-func remove_resource_from_catalog(path: String, catalog_name: String, force_save: bool = false) -> bool:
+func remove_resource_from_catalog(path: String, catalog_name: String,
+ force_save: bool = false, emit_changed: bool = true) -> bool:
 	for catalog in _catalogs:
 		if catalog[NAME_KEY] == catalog_name:
 			var key = get_key_by_path(path)
@@ -97,7 +102,8 @@ func remove_resource_from_catalog(path: String, catalog_name: String, force_save
 			if force_save:
 				force_save_catalogs()
 			
-			changed.emit()
+			if emit_changed:
+				changed.emit()
 			
 			return true
 	

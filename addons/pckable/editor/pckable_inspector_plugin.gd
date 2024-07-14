@@ -1,7 +1,8 @@
 class_name PckableInspectorPlugin extends EditorInspectorPlugin
 
 
-const INSPECTOR_RESOURCE: Resource = preload('res://addons/pckable/editor/scenes/pckable_inspector.tscn')
+const INSPECTOR_RESOURCE: Resource = \
+ preload('res://addons/pckable/editor/scenes/pckable_inspector.tscn')
 const EXCLUDED_FILES = [
 	"res://project.godot",
 	"res://export_presets.cfg",
@@ -39,8 +40,8 @@ func _can_handle(object : Object) -> bool:
 
 
 func _parse_begin(object : Object) -> void:
-	var inspector_instance := INSPECTOR_RESOURCE.instantiate() as PackefierInspector
-	
+	var inspector_instance := INSPECTOR_RESOURCE.instantiate() \
+	 as PackefierInspector
 	
 	inspector_instance.setup(_path, _storage)
 	inspector_instance.save_requested.connect(on_save_requested)
@@ -48,7 +49,8 @@ func _parse_begin(object : Object) -> void:
 	add_custom_control(inspector_instance)
 
 
-func on_save_requested(key: String, catalog_name: String, enabled: bool) -> void:
+func on_save_requested(key: String, catalog_name: String,
+ enabled: bool) -> void:
 	if enabled:
 		_storage.add_resource_to_catalog(key, _path, catalog_name, true)
 		print("add resource \"%s\" to %s" % [_path, catalog_name])
