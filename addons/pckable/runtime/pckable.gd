@@ -1,5 +1,6 @@
 extends Node
 
+
 const LOADING_STATUS := 1
 const catalog_loading_status: Dictionary = {};
 

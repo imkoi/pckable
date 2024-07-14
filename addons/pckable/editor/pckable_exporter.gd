@@ -1,10 +1,11 @@
 class_name PckableExporter extends Node
 
-const PLUGIN_INCLUDES = [
-	"res://addons/pckable/scripts/pckable_storage_runtime.gd",
-	"res://addons/pckable/scripts/pckable_storage_base.gd",
-	"res://addons/pckable/scripts/pckable_path_utility.gd",
-	"res://addons/pckable/pckable.gd",
+const PLUGIN_INCLUDES : PackedStringArray = [
+	"res://addons/pckable/plugin.cfg",
+	"res://addons/pckable/runtime/pckable.gd",
+	"res://addons/pckable/runtime/pckable_path_utility.gd",
+	"res://addons/pckable/runtime/pckable_storage_base.gd",
+	"res://addons/pckable/runtime/pckable_storage_runtime.gd",
 	"res://pckable_manifest.json",
 ]
 const CATALOG_EXPORT_ARGS := \
@@ -153,8 +154,10 @@ static func _get_project_files(catalog_names: PackedStringArray,
 		
 		files.remove_at(removed_file_index - offset)
 	
-	for included_file in PLUGIN_INCLUDES:
+	for i in range(PLUGIN_INCLUDES.size() - 1, 0, -1):
+		var included_file := PLUGIN_INCLUDES[i]
+		
 		if not files.has(included_file):
-			files.append(included_file)
+			files.insert(0, included_file)
 
 	return files
