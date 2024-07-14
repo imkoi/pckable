@@ -26,6 +26,8 @@ func _ready() -> void:
 	
 	_catalog_factory.request_create_item.connect(_on_request_create_item)
 	_menu.request_tree_refresh.connect(_on_request_tree_refresh)
+	
+	_storage.catalogs_changed.connect(_on_request_tree_refresh)
 
 
 func _on_request_create_item(catalog_name: String):

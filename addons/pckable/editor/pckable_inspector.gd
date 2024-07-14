@@ -39,11 +39,10 @@ func _ready() -> void:
 		
 		if catalog_name == _catalog:
 			_previous_option_index = selected_index
-			break;
 		selected_index += 1
 	
 	if _previous_option_index >= 0:
-		option_button.select(selected_index)
+		option_button.select(_previous_option_index)
 	
 	line_edit.set_text(_key)
 	
