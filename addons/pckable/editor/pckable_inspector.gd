@@ -51,7 +51,7 @@ func _on_key_submitted(key: String) -> void:
 	save_requested.emit(key, catalog_name, check_button.is_pressed())
 
 
-func _on_storage_changed():
+func _on_storage_changed() -> void:
 	option_button.clear()
 	
 	var linked := not _storage.get_catalog_name_by_path(_path).is_empty()

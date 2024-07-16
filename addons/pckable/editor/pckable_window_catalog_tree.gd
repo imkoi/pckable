@@ -28,7 +28,7 @@ func _drop_data(at_position: Vector2, data: Variant):
 	var dropable_paths := PackedStringArray()
 	
 	print("_drop_data")
-	var file_paths = data["files"]
+	var file_paths := data["files"] as PackedStringArray
 	for path in file_paths:
 		print(path)
 		#var item_len = get_item_count()
@@ -36,10 +36,10 @@ func _drop_data(at_position: Vector2, data: Variant):
 		#set_item_metadata(item_len, path)
 
 
-func _can_drop_data(at_position: Vector2, data: Variant):
+func _can_drop_data(at_position: Vector2, data: Variant) -> bool:
 	var dropable_paths := PackedStringArray()
 
-	var file_paths = data["files"]
+	var file_paths := data["files"] as PackedStringArray
 	for path in file_paths:
 		if path.begins_with("res://addons/"):
 			return false
@@ -65,11 +65,11 @@ func build_tree() -> void:
 	
 	for catalog_name in catalog_names:
 		var catalog_address := _storage.get_catalog_address(catalog_name)
-		var catalog_resources = _storage.get_catalog_resources(catalog_name)
+		var catalog_resources := _storage.get_catalog_resources(catalog_name)
 		var catalog_item := _create_catalog(catalog_name, catalog_address)
 		
 		for resource in catalog_resources:
-			var resource_item = create_item(catalog_item)
+			var resource_item := create_item(catalog_item)
 			
 			resource_item.set_text(0, resource.path)
 			resource_item.set_custom_color(0, _resource_text_color)
@@ -90,7 +90,7 @@ func rebuild_tree() -> void:
 
 
 func _create_catalog(catalog_name: String, catalog_address: String) -> TreeItem:
-	var catalog_item := create_item();
+	var catalog_item := create_item()
 	
 	catalog_item.set_text(0, catalog_name)
 	catalog_item.set_editable(1, true)
@@ -113,7 +113,7 @@ func _on_item_clicked(item: TreeItem, column: int, button_id: int,
 	
 	if text.begins_with("res://"):
 		if button_id == 0:
-			var resource = load(text)
+			var resource := load(text)
 			if resource:
 				EditorInterface.edit_resource(resource)
 		else:

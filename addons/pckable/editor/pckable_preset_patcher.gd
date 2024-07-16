@@ -6,7 +6,7 @@ const PRESET_PATH := "res://export_presets.cfg"
 
 static func preprocess_export_preset(preset_name: String,
  files: PackedStringArray):
-	var config = PckablePresetProvider.get_preset_config()
+	var config := PckablePresetProvider.get_preset_config()
 	var original_files := PackedStringArray()
 	
 	for section in config.get_sections():
@@ -31,7 +31,7 @@ static func preprocess_export_preset(preset_name: String,
 
 static func postprocess_export_preset(preset_name: String,
  original_files) -> void:
-	var config = PckablePresetProvider.get_preset_config()
+	var config := PckablePresetProvider.get_preset_config()
 	
 	for section in config.get_sections():
 		if not config.has_section_key(section, "name"):

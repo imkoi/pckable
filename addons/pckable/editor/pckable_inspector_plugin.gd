@@ -14,7 +14,7 @@ const EXCLUDED_DIRS = [
 
 var _path : String
 var _storage: PckableStorageEditor
-var min_path_lenght = "res://".length()
+var min_path_lenght := "res://".length()
 
 
 func setup(storage: PckableStorageEditor) -> void:
@@ -23,11 +23,11 @@ func setup(storage: PckableStorageEditor) -> void:
 
 func _can_handle(object : Object) -> bool:
 	if object is Node:
-		var node = object as Node
+		var node := object as Node
 		_path = node.scene_file_path
 	
 	if object is Resource:
-		var resource = object as Resource;
+		var resource := object as Resource
 		_path = resource.resource_path
 	
 	if EXCLUDED_DIRS.any(func(dir): return _path.begins_with(dir)):

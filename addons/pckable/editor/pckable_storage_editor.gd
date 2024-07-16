@@ -15,7 +15,7 @@ func setup() -> void:
 	_catalogs = catalogs
 
 
-func add_catalog(catalog_name: String, force_save = false) -> void:
+func add_catalog(catalog_name: String, force_save: bool = false) -> void:
 	var new_catalog := {
 		NAME_KEY : catalog_name,
 		ADDRESS_KEY : "local",
@@ -32,15 +32,13 @@ func add_catalog(catalog_name: String, force_save = false) -> void:
 	changed.emit()
 
 
-func remove_catalog(catalog_name: String, force_save = false) -> bool:
+func remove_catalog(catalog_name: String, force_save: bool = false) -> bool:
 	var remove_index := -1
 	
 	for catalog in _catalogs:
 		remove_index += 1
 		
-		var suspect_catalog_name = catalog[NAME_KEY]
-		
-		if suspect_catalog_name != catalog_name:
+		if catalog[NAME_KEY] != catalog_name:
 			continue
 		
 		for resource in catalog[RESOURCES_KEY]:
@@ -65,13 +63,13 @@ func add_resource_to_catalog(key: String, path: String,
  catalog_name: String, force_save: bool = false,
  emit_changed: bool = true) -> bool:
 	if _path_to_catalog_name.has(path):
-		var previous_catalog = _path_to_catalog_name[path]
+		var previous_catalog := _path_to_catalog_name[path] as String
 		
 		remove_resource_from_catalog(path, previous_catalog,
 		 false, false)
 	
 	for catalog in _catalogs:
-		var suspect_catalog_name = catalog[NAME_KEY]
+		var suspect_catalog_name := catalog[NAME_KEY] as String
 		
 		if suspect_catalog_name == catalog_name:
 			catalog[RESOURCES_KEY].push_back({"key": key, "path" : path})
@@ -93,7 +91,7 @@ func remove_resource_from_catalog(path: String, catalog_name: String,
  force_save: bool = false, emit_changed: bool = true) -> bool:
 	for catalog in _catalogs:
 		if catalog[NAME_KEY] == catalog_name:
-			var key = get_key_by_path(path)
+			var key := get_key_by_path(path)
 			catalog[RESOURCES_KEY].erase({"key" : key, "path" : path})
 			
 			_key_to_path.erase(key)
@@ -113,9 +111,7 @@ func remove_resource_from_catalog(path: String, catalog_name: String,
 func set_catalog_address(catalog_name: String, address: String,
  force_save: bool) -> void:
 	for catalog in _catalogs:
-		var suspect_catalog_name = catalog[NAME_KEY]
-		
-		if catalog_name != suspect_catalog_name:
+		if catalog_name != catalog[NAME_KEY]:
 			continue
 			
 		catalog[ADDRESS_KEY] = address
@@ -133,9 +129,7 @@ func get_catalog_names() -> PackedStringArray:
 	var catalog_names := PackedStringArray()
 	
 	for catalog in _catalogs:
-		var catalog_name = catalog[NAME_KEY]
-		
-		catalog_names.push_back(catalog_name)
+		catalog_names.push_back(catalog[NAME_KEY])
 	
 	return catalog_names
 
@@ -160,11 +154,10 @@ func catalog_exist(catalog_name: String) -> bool:
 	return false
 
 
-func force_save_catalogs():
+func force_save_catalogs() -> void:
 	var json_string := JSON.stringify(_catalogs)
 	var file := FileAccess.open(MANIFEST_PATH, FileAccess.WRITE)
 	
 	file.store_string(json_string)
-	file.close();
 	
 	print("catalogs saved")

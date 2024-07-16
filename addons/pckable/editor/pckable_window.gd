@@ -11,8 +11,10 @@ func setup(storage: PckableStorageEditor) -> void:
 
 func _ready() -> void:
 	close_requested.connect(_on_close_requested)
+	
+	print(ProjectSettings.globalize_path("user://"))
 
 
 func _on_close_requested() -> void:
-	hide();
-	queue_free();
+	hide()
+	queue_free()

@@ -18,11 +18,12 @@ var _item_catalog_dictionary: Dictionary
 var _viewport_ready: bool
 
 
-func setup(storage: PckableStorageEditor, item_catalog_dictionary: Dictionary):
+func setup(storage: PckableStorageEditor,
+ item_catalog_dictionary: Dictionary) -> void:
 	_storage = storage
 	_item_catalog_dictionary = item_catalog_dictionary
 	
-	var presets = PckablePresetProvider.get_preset_names()
+	var presets := PckablePresetProvider.get_preset_names()
 	
 	for i in presets.size():
 		var preset_name := presets[i] as String
@@ -63,7 +64,7 @@ func _on_export_project_pressed() -> void:
 		catalog_names.push_back(catalog_name as String)
 	
 	var preset_index := _preset_button.get_selected_id()
-	var preset_name = _preset_button.get_item_text(preset_index)
+	var preset_name := _preset_button.get_item_text(preset_index)
 	
 	_try_setup_viewport()
 	
@@ -101,7 +102,7 @@ func _on_export_catalogs_pressed() -> void:
 	
 	var dir_selected = await _file_dialog.dir_selected
 	var preset_index := _preset_button.get_selected_id()
-	var preset_name = _preset_button.get_item_text(preset_index)
+	var preset_name := _preset_button.get_item_text(preset_index)
 	
 	await PckableExporter.export_catalogs(dir_selected, catalog_names,
 	 preset_name, _storage, _export_progress_popup)
@@ -113,7 +114,7 @@ func _on_refresh_pressed() -> void:
 
 func _try_setup_viewport() -> void:
 	if not _viewport_ready:
-		var viewport = get_viewport()
+		var viewport := get_viewport()
 		
 		viewport.add_child(_file_dialog)
 		viewport.add_child(_export_progress_popup)

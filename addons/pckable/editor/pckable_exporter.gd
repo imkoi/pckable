@@ -16,18 +16,18 @@ const PROJECT_EXPORT_ARGS := \
 static func export_project(exe_path : String, path: String,
  preset_name: String, storage: PckableStorageEditor,
  progress_popup: PckableExportProgressPopup) -> void:
-	var popup_resolution = Vector2(
+	var popup_resolution := Vector2(
 		DisplayServer.screen_get_size().x / 6,
 		DisplayServer.screen_get_size().y / 6)
 	
 	if progress_popup:
-		var text_template = "Exporting project..."
+		var text_template := "Exporting project..."
 		progress_popup.set_text(text_template)
 		
 		progress_popup.popup_centered(popup_resolution)
 		await progress_popup.get_tree().create_timer(0.25).timeout
 	
-	var godot_executable_path = OS.get_executable_path()
+	var godot_executable_path := OS.get_executable_path()
 	var project_path := ProjectSettings.globalize_path("res://")
 	var build_path := path
 	
@@ -38,22 +38,16 @@ static func export_project(exe_path : String, path: String,
 		original_files,
 		storage)
 	
-	push_warning(files)
-	
 	var original_presets = PckablePresetPatcher.preprocess_export_preset(
 		preset_name, files)
 	
-	var original_files2 := PckablePresetProvider.get_preset_resources(
-		preset_name)
-	push_warning(original_files2)
-	
-	var arg = PROJECT_EXPORT_ARGS % [
+	var arg := PROJECT_EXPORT_ARGS % [
 		godot_executable_path,
 		project_path,
 		preset_name,
 		exe_path]
 	
-	var outputs = []
+	var outputs := []
 	
 	OS.execute("CMD.exe", ["/C", arg], outputs)
 	
@@ -69,7 +63,7 @@ static func export_project(exe_path : String, path: String,
 static func export_catalogs(path: String, catalog_names: PackedStringArray,
  preset_name: String, storage: PckableStorageEditor,
  progress_popup: PckableExportProgressPopup) -> void:
-	var popup_resolution = Vector2(
+	var popup_resolution := Vector2(
 		DisplayServer.screen_get_size().x / 6,
 		DisplayServer.screen_get_size().y / 6)
 	
@@ -79,20 +73,19 @@ static func export_catalogs(path: String, catalog_names: PackedStringArray,
 	
 	for catalog_name in catalog_names:
 		if progress_popup:
-			var text_template = "Exporting \"%s\" catalog..."
-			var progress_popup_text = text_template % catalog_name
+			var text_template := "Exporting \"%s\" catalog..."
+			var progress_popup_text := text_template % catalog_name
 			progress_popup.set_text(progress_popup_text)
 			await progress_popup.get_tree().create_timer(0.25).timeout
 		
-		var godot_executable_path = OS.get_executable_path()
+		var godot_executable_path := OS.get_executable_path()
 		var project_path := ProjectSettings.globalize_path("res://")
 		var build_path := path
 		
 		if storage.get_catalog_address(catalog_name) != "local":
 			build_path += "remote/"
-			var build_dir = DirAccess.open(build_path)
 			
-			if not build_dir:
+			if not DirAccess.open(build_path):
 				DirAccess.make_dir_absolute(build_path)
 		
 		var pck_file_path := "%s/%s.pck" % [build_path, catalog_name]
@@ -105,15 +98,15 @@ static func export_catalogs(path: String, catalog_names: PackedStringArray,
 		var original_presets = PckablePresetPatcher.preprocess_export_preset(
 			preset_name, resource_paths)
 		
-		pck_file_path = pck_file_path.replace(project_path, "")
+		pck_file_path = pck_file_path.replace(project_path, String())
 		
-		var arg = CATALOG_EXPORT_ARGS % [
+		var arg := CATALOG_EXPORT_ARGS % [
 			godot_executable_path,
 			project_path,
 			preset_name,
 			pck_file_path]
 		
-		var outputs = []
+		var outputs := []
 		
 		OS.execute("CMD.exe", ["/C", arg], outputs)
 		
@@ -132,7 +125,7 @@ static func _get_project_files(catalog_names: PackedStringArray,
 	var excluded_files := PackedStringArray()
 	
 	for catalog_name in catalog_names:
-		var resources = storage.get_catalog_resources(catalog_name)
+		var resources := storage.get_catalog_resources(catalog_name)
 		excluded_files.append_array(resources)
 
 	var files := original_files.slice(0, original_files.size())
@@ -147,8 +140,8 @@ static func _get_project_files(catalog_names: PackedStringArray,
 		file_index += 1
 	
 	removed_file_indices.sort()
-	var original_size := files.size();
-
+	var original_size := files.size()
+	
 	for removed_file_index in removed_file_indices:
 		var offset := original_size - files.size()
 		
@@ -159,5 +152,5 @@ static func _get_project_files(catalog_names: PackedStringArray,
 		
 		if not files.has(included_file):
 			files.insert(0, included_file)
-
+	
 	return files

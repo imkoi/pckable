@@ -8,12 +8,10 @@ const CATALOG_PATH: String = "res://pckable_catalogs.json"
 const WINDOW_RESOURCE: Resource = preload("res://addons/pckable/editor/scenes/pckable_window.tscn")
 const DOCK_RESOURCE: Resource = preload("res://addons/pckable/editor/scenes/pckable_control.tscn")
 const INSPECTOR_PLUGIN_RESOURCE: Resource = preload("res://addons/pckable/editor/pckable_inspector_plugin.gd")
-const EXPORT_PLUGIN_RESOURCE: Resource = preload("res://addons/pckable/editor/pckable_export_plugin.gd")
 
 var window: PckableWindow
 var dock: PckableControl
 var inspector_plugin: PckableInspectorPlugin
-var export_plugin: PckableExportPlugin
 var storage: PckableStorageEditor
 var catalogs: Dictionary
 
@@ -32,13 +30,9 @@ func _enter_tree() -> void:
 	dock.setup(storage)
 	
 	inspector_plugin = INSPECTOR_PLUGIN_RESOURCE.new()
-	export_plugin = EXPORT_PLUGIN_RESOURCE.new()
-	
 	inspector_plugin.setup(storage)
-	export_plugin.setup(storage)
 	
 	add_inspector_plugin(inspector_plugin)
-	#add_export_plugin(export_plugin)
 	add_tool_menu_item(PCKABLE_WINDOW_NAME, _open_window)
 	add_control_to_dock(2, dock)
 
@@ -50,7 +44,6 @@ func _exit_tree() -> void:
 		return
 		
 	remove_inspector_plugin(inspector_plugin)
-	#remove_export_plugin(export_plugin)
 	remove_tool_menu_item(PCKABLE_WINDOW_NAME)
 	remove_control_from_docks(dock)
 	
@@ -67,8 +60,8 @@ func _exit_tree() -> void:
 
 func _open_window() -> void:
 	if not window:
-		var screen_resolution = DisplayServer.screen_get_size();
-		var target_resolution = Vector2(
+		var screen_resolution := DisplayServer.screen_get_size()
+		var target_resolution := Vector2(
 				screen_resolution.x / 2,
 				screen_resolution.y / 2)
 		

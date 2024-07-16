@@ -2,16 +2,19 @@ extends Node
 
 
 const LOADING_STATUS := 1
-const catalog_loading_status: Dictionary = {};
+const RESPONSE_BODY_KEY := "body"
+const CATALOG_LOADING_STATUS := {}
 
-var _storage: PckableStorageRuntime;
-var _http_requests_pool: Dictionary = {}; # http_request to is_free
-var max_http_requests_pool: int = 4;
+var _storage: PckableStorageRuntime
+var _http_requests_pool := Dictionary() # http_request to is_free
+var _scene_tree: SceneTree
+var _initializd: bool
+var max_http_requests_pool: int = 4
 
 
 func _exit_tree() -> void:
 	if _storage:
-		_storage.free();
+		_storage.free()
 
 
 func load_manifest(manifest_json: StringName) -> bool:
@@ -23,7 +26,7 @@ func load_manifest(manifest_json: StringName) -> bool:
 		
 		return false
 	
-	var catalogs = json.data as Array
+	var catalogs := json.data as Array
 	
 	return _storage.add_manifest(catalogs)
 
@@ -31,85 +34,43 @@ func load_manifest(manifest_json: StringName) -> bool:
 func load_resource(key: String, timeout_msec: int = 60000) -> Resource:
 	_try_init()
 	
-	var path := _storage.get_path_by_key(key)
-	var catalog_name := _storage.get_catalog_name_by_path(path)
-
-	await _load_catalog(catalog_name, timeout_msec)
+	var bundle := await load_resources([key], timeout_msec)
 	
-	var main_loop = Engine.get_main_loop();
+	if bundle.has(key):
+		return bundle[key]
 	
-	ResourceLoader.load_threaded_request(path, "", false, 2)
-
-	while ResourceLoader.load_threaded_get_status(path) == LOADING_STATUS:
-		await main_loop.process_frame
-	
-	match ResourceLoader.load_threaded_get_status(path):
-		0:
-			push_error("invalid path %s" % path)
-			return null
-		2: 
-			push_error("load path failed %s" % path)
-			return null
-	
-	return ResourceLoader.load_threaded_get(path)
+	return null
 
 
 func load_resources(keys: PackedStringArray,
  timeout_msec: int = 60000) -> Dictionary:
 	_try_init()
 	
-	var catalogs_to_load := PackedStringArray()
-	var paths := PackedStringArray()
+	var bundle := Dictionary()
+	var timer := PckableTimer.create(timeout_msec)
+	var catalog_names := PackedStringArray()
+	var resources := PackedStringArray()
 	
-	paths.resize(keys.size())
+	resources.resize(keys.size())
 	
 	for i in keys.size():
-		paths[i] = _storage.get_path_by_key(keys[i])
-		var catalog_name := _storage.get_catalog_name_by_path(paths[i])
+		resources[i] = _storage.get_path_by_key(keys[i])
+		var catalog_name := _storage.get_catalog_name_by_path(resources[i])
 		
-		if not catalogs_to_load.has(catalog_name):
-			catalogs_to_load.push_back(catalog_name)
+		if not catalog_names.has(catalog_name):
+			catalog_names.push_back(catalog_name)
 	
-	for catalog_name in catalogs_to_load:
-		await _load_catalog(catalog_name, timeout_msec)
-	
-	var main_loop = Engine.get_main_loop();
-	
-	for path in paths:
-		ResourceLoader.load_threaded_request(path, "", false, 2)
-	
-	while not _all_resources_loaded(paths):
-		await main_loop.process_frame
-
-	var results := {}
-	
-	for i in paths.size():
-		var path := paths[i]
+	for catalog_name in catalog_names:
+		await _load_catalog(catalog_name, timer)
 		
-		match ResourceLoader.load_threaded_get_status(path):
-			0:
-				push_error("invalid path %s" % path)
-			2: 
-				push_error("load path failed %s" % path)
-			_:
-				results[keys[i]] = ResourceLoader.load_threaded_get(path)
+		if timer.is_expired():
+			return bundle
 	
-	return results
+	return await _load_resources_internal(keys, resources, timer)
 
 
-func _all_resources_loaded(paths: PackedStringArray) -> bool:
-	var loaded_resources := 0
-	
-	for path in paths:
-		if ResourceLoader.load_threaded_get_status(path) != LOADING_STATUS:
-			loaded_resources += 1
-	
-	return loaded_resources == paths.size()
-
-
-func _load_catalog(catalog_name: StringName,
- timeout_msec: int = 60000) -> bool:
-	if catalog_name.length() == 0:
+func _load_catalog(catalog_name: StringName, timer: PckableTimer) -> bool:
+	if catalog_name.is_empty():
 		push_error("catalog name could not be empty")
 		return false
 	
@@ -117,78 +78,114 @@ func _load_catalog(catalog_name: StringName,
 	
 	if catalog_address.length() > 0 and catalog_address != "local":
 		print("start downloading %s" % catalog_name)
-		var url = catalog_address + "/" + catalog_name + ".pck"
-		var pck_data := await _download_pck_data(url, timeout_msec)
+		var url := catalog_address + "/" + catalog_name + ".pck"
+		var pck_data := await _download_pck_data(url, timer)
+		
+		if timer.is_expired():
+			push_error("free request was not found in time")
+			return false
 		
 		if pck_data.size() == 0:
 			push_error("downloaded empty catalog")
 			return false
 		
-		var file_path = PckablePathUtility.get_executable_dir()
+		var file_path := PckablePathUtility.get_executable_dir()
 		file_path += catalog_name + ".pck"
 		
 		var file := FileAccess.open(file_path, FileAccess.WRITE_READ)
 		
 		file.store_buffer(pck_data)
-		file.close()
 	
-	var pck_path = "res://%s.pck" % catalog_name
+	var pck_path := "user://%s.pck" % catalog_name
 	
 	return ProjectSettings.load_resource_pack(pck_path)
 
 
-func _download_pck_data(url: String, timeout_msec: int) -> PackedByteArray:
-	var start_usec := Time.get_ticks_usec()
-	var request_node := await _pull_http_request_node(timeout_msec);
+func _download_pck_data(url: String, timer: PckableTimer) -> PackedByteArray:
+	var request_node := await _pull_http_request_node(timer)
 	
 	if not request_node:
 		return PackedByteArray()
 	
-	var main_loop = Engine.get_main_loop();
-	var payload = Dictionary()
-	var callback = _on_request_completed.bind(payload)
-	var time_spent_msec := (Time.get_ticks_usec() - start_usec) / 1000.0
+	var payload := Dictionary()
+	var callback := _on_request_completed.bind(payload)
 	
-	request_node.request_completed.connect(callback);
-	request_node.timeout = (timeout_msec - time_spent_msec) / 1000.0
-	request_node.request(url);
+	request_node.request_completed.connect(callback)
+	request_node.timeout = timer.get_time_left_sec()
+	request_node.request(url)
 	
-	while not payload.has("result"):
-		await main_loop.process_frame
+	while not timer.is_expired() || payload.has(RESPONSE_BODY_KEY):
+		await _scene_tree.process_frame
 	
-	return payload.result
+	request_node.request_completed.disconnect(callback)
+	
+	return payload.body
 
 
-func _pull_http_request_node(timeout_msec: int) -> HTTPRequest:
-	var start_time_usec = Time.get_ticks_usec()
+func _pull_http_request_node(timer: PckableTimer) -> HTTPRequest:
+	var free_request := get_free_request()
 	
-	for request_to_is_free in _http_requests_pool:
-		var request := request_to_is_free["request"] as HTTPRequest
-		
-		if request_to_is_free["is_free"]:
-			return request
+	if free_request:
+		return free_request
 	
 	if _http_requests_pool.size() < max_http_requests_pool:
-		var request := HTTPRequest.new()
-		add_child(request)
-		_http_requests_pool[request] = false
+		free_request = HTTPRequest.new()
+		add_child(free_request)
+		_http_requests_pool[free_request] = false
+	
+	while not free_request and not timer.is_expired():
+		await _scene_tree.process_frame
 		
-		return request
+		free_request = get_free_request()
 	
-	var main_loop := Engine.get_main_loop()
-	
-	while (Time.get_ticks_usec() - start_time_usec) / 1000.0 < timeout_msec:
-		await main_loop.process_frame
-		
-		for request_to_is_free in _http_requests_pool:
-			var request := request_to_is_free["request"] as HTTPRequest
-			
-			if request_to_is_free["is_free"]:
-				return request
-	
-	push_error("Pull node was timeouted")
+	return free_request
+
+
+func get_free_request() -> HTTPRequest:
+	for request in _http_requests_pool:
+		if _http_requests_pool[request]:
+			return request
 	
 	return null
+
+
+func _load_resources_internal(keys: PackedStringArray,
+ resources: PackedStringArray, timer: PckableTimer) -> Dictionary:
+	var bundle := Dictionary()
+	
+	for resource in resources:
+		ResourceLoader.load_threaded_request(resource, String(), false, 2)
+	
+	while not _all_resources_loaded(resources) and not timer.is_expired():
+		await _scene_tree.process_frame
+	
+	if timer.is_expired():
+		push_error("resource was not loaded in time")
+		
+		return bundle
+	
+	for i in resources.size():
+		var resource := resources[i]
+		
+		match ResourceLoader.load_threaded_get_status(resource):
+			0:
+				push_error("invalid path %s" % resource)
+			2: 
+				push_error("load path failed %s" % resource)
+			_:
+				bundle[keys[i]] = ResourceLoader.load_threaded_get(resource)
+	
+	return bundle
+
+
+func _all_resources_loaded(resources: PackedStringArray) -> bool:
+	var loaded_resources := 0
+	
+	for resource in resources:
+		if ResourceLoader.load_threaded_get_status(resource) != LOADING_STATUS:
+			loaded_resources += 1
+	
+	return loaded_resources == resources.size()
 
 
 func _on_request_completed(result: int, response_code: int,
@@ -199,10 +196,13 @@ func _on_request_completed(result: int, response_code: int,
 	if response_code < 200 or response_code > 299:
 		push_error("wrong response code received %s" % response_code)
 	
-	status["result"] = body
+	status[RESPONSE_BODY_KEY] = body
 
 
 func _try_init() -> void:
-	if not _storage:
-		_storage = PckableStorageRuntime.new();
+	if not _initializd:
+		_storage = PckableStorageRuntime.new()
 		_storage.setup()
+		_scene_tree = get_tree()
+		
+		_initializd = true

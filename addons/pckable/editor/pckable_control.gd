@@ -30,11 +30,11 @@ func _ready() -> void:
 	_storage.changed.connect(_on_request_tree_refresh)
 
 
-func _on_request_create_item(catalog_name: String):
+func _on_request_create_item(catalog_name: String) -> void:
 	_storage.add_catalog(catalog_name, true)
 
 
-func _on_request_tree_refresh():
+func _on_request_tree_refresh() -> void:
 	_catalog_tree.clear()
 	_item_catalog_name_dictionary.clear()
 	
@@ -42,5 +42,5 @@ func _on_request_tree_refresh():
 
 
 func _on_close_requested() -> void:
-	hide();
-	queue_free();
+	hide()
+	queue_free()

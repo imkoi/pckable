@@ -2,8 +2,8 @@
 class_name PckableWindowCatalogFactory extends Node
 
 
-@onready var _add_catalog_text: LineEdit = $LineEdit;
-@onready var _add_catalog_button: Button = $Button;
+@onready var _add_catalog_text: LineEdit = $LineEdit
+@onready var _add_catalog_button: Button = $Button
 
 signal request_create_item(catalog_name: String)
 
