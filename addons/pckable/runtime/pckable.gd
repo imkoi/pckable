@@ -9,7 +9,10 @@ var _storage: PckableStorageRuntime
 var _http_requests_pool := Dictionary() # http_request to is_free
 var _scene_tree: SceneTree
 var _initializd: bool
-var max_http_requests_pool: int = 4
+var max_http_requests_pool := 4
+var http_timout := 10.0
+var max_retries_count := 3
+var retry_delay := 5.0
 
 
 func _exit_tree() -> void:
@@ -109,13 +112,32 @@ func _download_pck_data(url: String, timer: PckableTimer) -> PackedByteArray:
 	
 	var payload := Dictionary()
 	var callback := _on_request_completed.bind(payload)
+	var retries := max_retries_count + 1
 	
 	request_node.request_completed.connect(callback)
-	request_node.timeout = timer.get_time_left_sec()
-	request_node.request(url)
 	
-	while not timer.is_expired() || payload.has(RESPONSE_BODY_KEY):
-		await _scene_tree.process_frame
+	while retries > 0 and not timer.is_expired():
+		var request_index := max_retries_count - retries
+		var delay := 0.0
+		
+		if request_index >= 0:
+			var temp := retry_delay * 2.0 ** request_index
+			delay = temp / 2.0 + randf_range(0.0, temp / 2)
+		
+		if delay > 0:
+			await _scene_tree.create_timer(delay).timeout
+		
+		request_node.timeout = min(timer.get_time_left_sec(), http_timout)
+		request_node.request(url)
+		
+		while not timer.is_expired() and not payload.has(RESPONSE_BODY_KEY):
+			await _scene_tree.process_frame
+		
+		if timer.is_expired() or not payload.has(RESPONSE_BODY_KEY):
+			return PackedByteArray()
+		
+		if not payload.body or payload.body.size() == 0:
+			retries -= 1
 	
 	request_node.request_completed.disconnect(callback)
 	

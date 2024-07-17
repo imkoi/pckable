@@ -76,11 +76,15 @@ func _on_export_project_pressed() -> void:
 	if not DirAccess.open(absolute_dir_path):
 		DirAccess.make_dir_absolute(absolute_dir_path)
 	
+	_export_progress_popup.popup_centered(_get_popup_resolution())
+
 	await PckableExporter.export_catalogs(absolute_dir_path,
 	 catalog_names, preset_name, _storage, _export_progress_popup)
 	
 	await PckableExporter.export_project(executable_path,
 	 dir_path, preset_name, _storage, _export_progress_popup)
+	
+	_export_progress_popup.hide()
 
 
 func _on_export_catalogs_pressed() -> void:
@@ -104,8 +108,18 @@ func _on_export_catalogs_pressed() -> void:
 	var preset_index := _preset_button.get_selected_id()
 	var preset_name := _preset_button.get_item_text(preset_index)
 	
+	_export_progress_popup.popup_centered(_get_popup_resolution())
+
 	await PckableExporter.export_catalogs(dir_selected, catalog_names,
 	 preset_name, _storage, _export_progress_popup)
+	
+	_export_progress_popup.hide()
+
+
+static func _get_popup_resolution() -> Vector2:
+	return Vector2(
+		DisplayServer.screen_get_size().x / 6,
+		DisplayServer.screen_get_size().y / 6)
 
 
 func _on_refresh_pressed() -> void:

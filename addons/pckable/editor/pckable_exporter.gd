@@ -6,26 +6,18 @@ const PLUGIN_INCLUDES : PackedStringArray = [
 	"res://addons/pckable/runtime/pckable_path_utility.gd",
 	"res://addons/pckable/runtime/pckable_storage_base.gd",
 	"res://addons/pckable/runtime/pckable_storage_runtime.gd",
+	"res://addons/pckable/runtime/pckable_timer.gd",
 	"res://pckable_manifest.json",
 ]
-const CATALOG_EXPORT_ARGS := \
+const CATALOG_EXPORT := \
  "\"%s\" --headless --path \"%s\" --export-pack \"%s\" \"%s\""
-const PROJECT_EXPORT_ARGS := \
+const PROJECT_EXPORT := \
  "\"%s\" --headless --path \"%s\" --export-release \"%s\" \"%s\""
 
 static func export_project(exe_path : String, path: String,
  preset_name: String, storage: PckableStorageEditor,
  progress_popup: PckableExportProgressPopup) -> void:
-	var popup_resolution := Vector2(
-		DisplayServer.screen_get_size().x / 6,
-		DisplayServer.screen_get_size().y / 6)
-	
-	if progress_popup:
-		var text_template := "Exporting project..."
-		progress_popup.set_text(text_template)
-		
-		progress_popup.popup_centered(popup_resolution)
-		await progress_popup.get_tree().create_timer(0.25).timeout
+	progress_popup.set_text("Exporting project...")
 	
 	var godot_executable_path := OS.get_executable_path()
 	var project_path := ProjectSettings.globalize_path("res://")
@@ -38,23 +30,15 @@ static func export_project(exe_path : String, path: String,
 		original_files,
 		storage)
 	
-	var original_presets = PckablePresetPatcher.preprocess_export_preset(
-		preset_name, files)
+	PckablePresetPatcher.preprocess_export_preset(preset_name, files)
 	
-	var arg := PROJECT_EXPORT_ARGS % [
+	await _execute_command(PROJECT_EXPORT, [
 		godot_executable_path,
 		project_path,
 		preset_name,
-		exe_path]
+		exe_path])
 	
-	var outputs := []
-	
-	OS.execute("CMD.exe", ["/C", arg], outputs)
-	
-	for output in outputs:
-		print(output)
-	
-	PckablePresetPatcher.postprocess_export_preset(preset_name, original_presets)
+	PckablePresetPatcher.postprocess_export_preset(preset_name, original_files)
 	
 	if progress_popup:
 		progress_popup.hide()
@@ -63,20 +47,9 @@ static func export_project(exe_path : String, path: String,
 static func export_catalogs(path: String, catalog_names: PackedStringArray,
  preset_name: String, storage: PckableStorageEditor,
  progress_popup: PckableExportProgressPopup) -> void:
-	var popup_resolution := Vector2(
-		DisplayServer.screen_get_size().x / 6,
-		DisplayServer.screen_get_size().y / 6)
-	
-	if progress_popup:
-		progress_popup.popup_centered(popup_resolution)
-		await progress_popup.get_tree().create_timer(0.25).timeout
-	
 	for catalog_name in catalog_names:
-		if progress_popup:
-			var text_template := "Exporting \"%s\" catalog..."
-			var progress_popup_text := text_template % catalog_name
-			progress_popup.set_text(progress_popup_text)
-			await progress_popup.get_tree().create_timer(0.25).timeout
+		var text_template := "Exporting \"%s\" catalog..."
+		progress_popup.set_text(text_template % catalog_name)
 		
 		var godot_executable_path := OS.get_executable_path()
 		var project_path := ProjectSettings.globalize_path("res://")
@@ -100,23 +73,13 @@ static func export_catalogs(path: String, catalog_names: PackedStringArray,
 		
 		pck_file_path = pck_file_path.replace(project_path, String())
 		
-		var arg := CATALOG_EXPORT_ARGS % [
+		await _execute_command(CATALOG_EXPORT, [
 			godot_executable_path,
 			project_path,
 			preset_name,
-			pck_file_path]
-		
-		var outputs := []
-		
-		OS.execute("CMD.exe", ["/C", arg], outputs)
-		
-		for output in outputs:
-			print(output)
+			pck_file_path])
 		
 		PckablePresetPatcher.postprocess_export_preset(preset_name, original_presets)
-	
-	if progress_popup:
-		progress_popup.hide()
 
 
 static func _get_project_files(catalog_names: PackedStringArray,
@@ -127,7 +90,7 @@ static func _get_project_files(catalog_names: PackedStringArray,
 	for catalog_name in catalog_names:
 		var resources := storage.get_catalog_resources(catalog_name)
 		excluded_files.append_array(resources)
-
+	
 	var files := original_files.slice(0, original_files.size())
 	var file_index := 0
 	var removed_file_indices := PackedInt32Array()
@@ -154,3 +117,17 @@ static func _get_project_files(catalog_names: PackedStringArray,
 			files.insert(0, included_file)
 	
 	return files
+
+
+static func _execute_command(command: String, args: Array) -> void:
+	var arg := command % args
+	var outputs := []
+	var callable := func(): OS.execute("CMD.exe", ["/C", arg], outputs)
+	
+	var task_id := WorkerThreadPool.add_task(callable)
+	
+	while not WorkerThreadPool.is_task_completed(task_id):
+		await Engine.get_main_loop().process_frame
+	
+	for output in outputs:
+		print(output)
