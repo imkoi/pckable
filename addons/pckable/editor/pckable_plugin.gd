@@ -8,17 +8,23 @@ const CATALOG_PATH: String = "res://pckable_catalogs.json"
 const WINDOW_RESOURCE: Resource = preload("res://addons/pckable/editor/scenes/pckable_window.tscn")
 const DOCK_RESOURCE: Resource = preload("res://addons/pckable/editor/scenes/pckable_control.tscn")
 const INSPECTOR_PLUGIN_RESOURCE: Resource = preload("res://addons/pckable/editor/pckable_inspector_plugin.gd")
+const AUTO_RELOAD_SETTING := "text_editor/behavior/files/auto_reload_scripts_on_external_change"
 
 var window: PckableWindow
 var dock: PckableControl
 var inspector_plugin: PckableInspectorPlugin
 var storage: PckableStorageEditor
 var catalogs: Dictionary
+var original_auto_reload_setting : bool
 
 
 func _enter_tree() -> void:
 	if _exporting_now():
 		return
+	
+	var settings = EditorInterface.get_editor_settings()
+	original_auto_reload_setting = settings.get_setting(AUTO_RELOAD_SETTING)
+	settings.set_setting(AUTO_RELOAD_SETTING, true)
 	
 	storage = PckableStorageEditor.new()
 	
@@ -38,11 +44,14 @@ func _enter_tree() -> void:
 
 
 func _exit_tree() -> void:
-	remove_autoload_singleton(PCKABLE_SINGLETON_NAME)
-	
 	if _exporting_now():
 		return
-		
+	
+	remove_autoload_singleton(PCKABLE_SINGLETON_NAME)
+	
+	var settings = EditorInterface.get_editor_settings()
+	settings.set_setting(AUTO_RELOAD_SETTING, original_auto_reload_setting)
+	
 	remove_inspector_plugin(inspector_plugin)
 	remove_tool_menu_item(PCKABLE_WINDOW_NAME)
 	remove_control_from_docks(dock)

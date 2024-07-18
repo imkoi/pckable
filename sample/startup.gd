@@ -9,30 +9,11 @@ func _ready() -> void:
 	#_main_scene = await Pckable.load_resource("main_scene")
 	#_main_scene = await Pckable.load_resource("my_cat")
 	
-	#var bundle = await Pckable.load_resources(["main_scene", "my_cat"])
-	#var main_node = bundle.main_scene.instantiate()
-	#
-	#main_node.set_texture(bundle.my_cat)
-	#add_child(main_node)
-	#
+	var bundle = await Pckable.load_resources(["main_scene", "my_cat"])
+	var main_node = bundle.main_scene.instantiate()
 	
-	var max_retries_count := 3
-	var retry_delay := 4.0
-	
-	var retries := max_retries_count + 1
-	
-	while retries > 0:
-		var request_index := max_retries_count - retries
-		
-		retries -= 1
-		
-		if request_index < 0:
-			continue
-		
-		var temp := retry_delay * 2.0 ** request_index
-		var delay:= temp / 2.0 + randf_range(0.0, temp / 2)
-		
-		print(delay)
+	main_node.set_texture(bundle.my_cat)
+	add_child(main_node)
 
 
 func api_usage() -> void:

@@ -1,14 +1,17 @@
 extends Node
 
 
+const EMPTY_STATUS := 0
 const LOADING_STATUS := 1
+const LOADED_STATUS := 2
 const RESPONSE_BODY_KEY := "body"
-const CATALOG_LOADING_STATUS := {}
 
 var _storage: PckableStorageRuntime
-var _http_requests_pool := Dictionary() # http_request to is_free
+var _catalog_loading := Dictionary()
 var _scene_tree: SceneTree
 var _initializd: bool
+
+var _http_requests_pool := Dictionary() # http_request to is_free
 var max_http_requests_pool := 4
 var http_timout := 10.0
 var max_retries_count := 3
@@ -34,10 +37,11 @@ func load_manifest(manifest_json: StringName) -> bool:
 	return _storage.add_manifest(catalogs)
 
 
-func load_resource(key: String, timeout_msec: int = 60000) -> Resource:
+func load_resource(key: String,
+ timeout_msec: int = 60000, use_cached: bool = true) -> Resource:
 	_try_init()
 	
-	var bundle := await load_resources([key], timeout_msec)
+	var bundle := await load_resources([key], timeout_msec, use_cached)
 	
 	if bundle.has(key):
 		return bundle[key]
@@ -46,7 +50,7 @@ func load_resource(key: String, timeout_msec: int = 60000) -> Resource:
 
 
 func load_resources(keys: PackedStringArray,
- timeout_msec: int = 60000) -> Dictionary:
+ timeout_msec: int = 60000, use_cached: bool = true) -> Dictionary:
 	_try_init()
 	
 	var bundle := Dictionary()
@@ -64,7 +68,7 @@ func load_resources(keys: PackedStringArray,
 			catalog_names.push_back(catalog_name)
 	
 	for catalog_name in catalog_names:
-		await _load_catalog(catalog_name, timer)
+		await _load_catalog(catalog_name, timer, use_cached)
 		
 		if timer.is_expired():
 			return bundle
@@ -72,8 +76,20 @@ func load_resources(keys: PackedStringArray,
 	return await _load_resources_internal(keys, resources, timer)
 
 
-func _load_catalog(catalog_name: StringName, timer: PckableTimer) -> bool:
+func _load_catalog(catalog_name: StringName, timer: PckableTimer, use_cached) -> bool:
+	if _catalog_loading.has(catalog_name):
+		while _catalog_loading[catalog_name] == LOADING_STATUS:
+			await _scene_tree.process_frame
+		
+		if use_cached:
+			if _catalog_loading[catalog_name] == LOADED_STATUS:
+				return true
+	
+	_catalog_loading[catalog_name] = LOADING_STATUS
+	
 	if catalog_name.is_empty():
+		_catalog_loading[catalog_name] = EMPTY_STATUS
+		
 		push_error("catalog name could not be empty")
 		return false
 	
@@ -85,10 +101,14 @@ func _load_catalog(catalog_name: StringName, timer: PckableTimer) -> bool:
 		var pck_data := await _download_pck_data(url, timer)
 		
 		if timer.is_expired():
+			_catalog_loading[catalog_name] = EMPTY_STATUS
+			
 			push_error("free request was not found in time")
 			return false
 		
 		if pck_data.size() == 0:
+			_catalog_loading[catalog_name] = EMPTY_STATUS
+			
 			push_error("downloaded empty catalog")
 			return false
 		
@@ -100,8 +120,14 @@ func _load_catalog(catalog_name: StringName, timer: PckableTimer) -> bool:
 		file.store_buffer(pck_data)
 	
 	var pck_path := "user://%s.pck" % catalog_name
+	var success := ProjectSettings.load_resource_pack(pck_path)
 	
-	return ProjectSettings.load_resource_pack(pck_path)
+	if success:
+		_catalog_loading[catalog_name] = LOADED_STATUS
+	else:
+		_catalog_loading[catalog_name] = EMPTY_STATUS
+	
+	return success
 
 
 func _download_pck_data(url: String, timer: PckableTimer) -> PackedByteArray:

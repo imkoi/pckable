@@ -77,6 +77,8 @@ func build_tree() -> void:
 			resource_item.set_text(1, resource.key)
 			resource_item.set_custom_color(1, _resource_text_color)
 			
+			resource_item.set_editable(1, true)
+			
 			resource_item.add_button(1, _file_texture, 0)
 			resource_item.set_button_color(1, 0, _resource_text_color)
 			resource_item.add_button(1, _remove_texture, 1)
@@ -90,17 +92,19 @@ func rebuild_tree() -> void:
 
 
 func _create_catalog(catalog_name: String, catalog_address: String) -> TreeItem:
+	var editable := catalog_name != "default"
 	var catalog_item := create_item()
 	
 	catalog_item.set_text(0, catalog_name)
-	catalog_item.set_editable(1, true)
+	catalog_item.set_editable(1, editable)
 	catalog_item.set_text(1, catalog_address)
 	
 	catalog_item.set_custom_color(0, _catalog_text_color)
 	catalog_item.set_custom_color(1, _catalog_text_color)
 	
-	catalog_item.add_button(1, _remove_texture, 0)
-	catalog_item.set_button_color(1, 0, _catalog_text_color)
+	if editable:
+		catalog_item.add_button(1, _remove_texture, 0)
+		catalog_item.set_button_color(1, 0, _catalog_text_color)
 	
 	_item_catalog_name_dictionary[catalog_item] = catalog_name
 	
@@ -128,16 +132,21 @@ func _on_item_clicked(item: TreeItem, column: int, button_id: int,
 
 
 func _on_item_edited() -> void:
-	var index := 0
-	var count := 0
-	
 	for item in _item_catalog_name_dictionary:
+		var catalog_item := item as TreeItem
 		var catalog_name := _item_catalog_name_dictionary[item] as String
 		var address := item.get_text(1) as String
 		
 		if address.is_empty():
 			address = "local"
 		
-		index += 1
+		for resource_item in catalog_item.get_children():
+			var resource_path := resource_item.get_text(0)
+			var resource_key := resource_item.get_text(1)
+			
+			_storage.add_resource_to_catalog(resource_key, resource_path,
+			 catalog_name, false, false)
 		
-		_storage.set_catalog_address(catalog_name, address, index == count)
+		_storage.set_catalog_address(catalog_name, address, false, false)
+	
+	_storage.force_save_catalogs()

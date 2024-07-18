@@ -27,6 +27,7 @@ static func export_project(exe_path : String, path: String,
 		preset_name)
 	var files := _get_project_files(
 		storage.get_catalog_names(),
+		storage.get_catalog_resources("default"),
 		original_files,
 		storage)
 	
@@ -48,6 +49,9 @@ static func export_catalogs(path: String, catalog_names: PackedStringArray,
  preset_name: String, storage: PckableStorageEditor,
  progress_popup: PckableExportProgressPopup) -> void:
 	for catalog_name in catalog_names:
+		if catalog_name == "default":
+			continue
+		
 		var text_template := "Exporting \"%s\" catalog..."
 		progress_popup.set_text(text_template % catalog_name)
 		
@@ -83,15 +87,24 @@ static func export_catalogs(path: String, catalog_names: PackedStringArray,
 
 
 static func _get_project_files(catalog_names: PackedStringArray,
+ default_files: PackedStringArray,
  original_files: PackedStringArray,
  storage: PckableStorageEditor) -> PackedStringArray:
 	var excluded_files := PackedStringArray()
 	
 	for catalog_name in catalog_names:
+		if catalog_name == "default":
+			continue
+		
 		var resources := storage.get_catalog_resources(catalog_name)
 		excluded_files.append_array(resources)
 	
 	var files := original_files.slice(0, original_files.size())
+	
+	for default_file in default_files:
+		if files.has(default_file):
+			files.insert(0, default_file)
+	
 	var file_index := 0
 	var removed_file_indices := PackedInt32Array()
 	

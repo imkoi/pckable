@@ -81,8 +81,11 @@ func _on_export_project_pressed() -> void:
 	await PckableExporter.export_catalogs(absolute_dir_path,
 	 catalog_names, preset_name, _storage, _export_progress_popup)
 	
-	await PckableExporter.export_project(executable_path,
-	 dir_path, preset_name, _storage, _export_progress_popup)
+	if executable_path and not executable_path.is_empty():
+		await PckableExporter.export_project(executable_path,
+		 dir_path, preset_name, _storage, _export_progress_popup)
+	else:
+		push_error("Export Path not setted inside %s" % preset_name)
 	
 	_export_progress_popup.hide()
 

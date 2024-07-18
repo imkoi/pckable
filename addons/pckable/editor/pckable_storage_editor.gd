@@ -10,6 +10,23 @@ func setup() -> void:
 		print("catalogs not found")
 		catalogs = save_catalogs(MANIFEST_PATH, [])
 	
+	var default_catalog_exist := false
+	
+	for catalog in catalogs:
+		if catalog[NAME_KEY] == "default":
+			default_catalog_exist = true
+			break;
+	
+	if not default_catalog_exist:
+		print("default catalog added")
+		var new_catalog := {
+		NAME_KEY : "default",
+		ADDRESS_KEY : "local",
+		RESOURCES_KEY : [],
+		}
+		
+		catalogs.insert(0, new_catalog)
+	
 	load_resources_from_manifest(catalogs)
 	
 	_catalogs = catalogs
@@ -27,7 +44,7 @@ func add_catalog(catalog_name: String, force_save: bool = false) -> void:
 	print("added catalog %s" % catalog_name)
 	
 	if force_save:
-		force_save_catalogs()
+		force_save_catalogs(false)
 	
 	changed.emit()
 
@@ -50,7 +67,7 @@ func remove_catalog(catalog_name: String, force_save: bool = false) -> bool:
 		print("removed catalog %s" % catalog_name)
 		
 		if force_save:
-			force_save_catalogs()
+			force_save_catalogs(false)
 		
 		changed.emit()
 		
@@ -77,10 +94,7 @@ func add_resource_to_catalog(key: String, path: String,
 			_key_to_path[key] = path
 			
 			if force_save:
-				force_save_catalogs()
-			
-			if emit_changed:
-				changed.emit()
+				force_save_catalogs(emit_changed)
 			
 			return true
 	
@@ -98,10 +112,7 @@ func remove_resource_from_catalog(path: String, catalog_name: String,
 			_path_to_catalog_name.erase(path)
 			
 			if force_save:
-				force_save_catalogs()
-			
-			if emit_changed:
-				changed.emit()
+				force_save_catalogs(emit_changed)
 			
 			return true
 	
@@ -109,16 +120,16 @@ func remove_resource_from_catalog(path: String, catalog_name: String,
 
 
 func set_catalog_address(catalog_name: String, address: String,
- force_save: bool) -> void:
+ force_save: bool, emit_changed: bool = true) -> void:
 	for catalog in _catalogs:
 		if catalog_name != catalog[NAME_KEY]:
 			continue
 			
 		catalog[ADDRESS_KEY] = address
-		print("catalog %s address setted to %" % [catalog_name, address])
+		print("catalog %s address setted to %s" % [catalog_name, address])
 		
 		if force_save:
-			force_save_catalogs()
+			force_save_catalogs(emit_changed)
 		
 		return
 	
@@ -154,10 +165,13 @@ func catalog_exist(catalog_name: String) -> bool:
 	return false
 
 
-func force_save_catalogs() -> void:
+func force_save_catalogs(emit_changed: bool = true) -> void:
 	var json_string := JSON.stringify(_catalogs)
 	var file := FileAccess.open(MANIFEST_PATH, FileAccess.WRITE)
 	
 	file.store_string(json_string)
+	
+	if emit_changed:
+		changed.emit()
 	
 	print("catalogs saved")
