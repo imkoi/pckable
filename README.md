@@ -7,5 +7,6 @@ By leveraging the capabilities of Godot, my plugin aims to streamline the develo
 
 ## Showcase
 Here is brief demo showing how this plugin works
-https://github.com/user-attachments/assets/b759c682-fed8-414f-bd41-10d94880baea
+[Video](https://github.com/user-attachments/assets/b759c682-fed8-414f-bd41-10d94880baea)
+
 
